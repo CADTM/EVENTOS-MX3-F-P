@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Evento Navideño – La Fisher MX3</title>
+  <meta name="description" content="Página para organizar el evento navideño de La Fisher MX3: confirma tu asistencia, apúntate con algo para llevar y revisa la agenda de la noche." />
+  <style>
+:root {
+  --verde: #14532d;
+  --verde-claro: #dcfce7;
+  --terracota: #b91c1c;
+  --terracota-suave: #fee2e2;
+  --crema: #fffbeb;
+  --texto: #1c1917;
+  --muted: #78716c;
+  --borde: #e7e5e4;
+  --blanco: #ffffff;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--crema);
+  color: var(--texto);
+  line-height: 1.5;
+}
+
+.hero {
+  background: linear-gradient(135deg, var(--verde), #166534 55%, var(--terracota));
+  color: var(--blanco);
+  text-align: center;
+  padding: 3.5rem 1.25rem 2.5rem;
+}
+
+.hero-eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  font-size: 0.8rem;
+  opacity: 0.9;
+  margin: 0 0 0.5rem;
+}
+
+.hero h1 {
+  margin: 0 0 0.5rem;
+  font-size: clamp(2rem, 6vw, 3rem);
+  line-height: 1.1;
+}
+
+.hero-sub { opacity: 0.95; margin: 0 auto 1.5rem; max-width: 32rem; }
+
+.countdown {
+  display: flex;
+  gap: 0.75rem;
+  justify-content: center;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.count-box {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 0.75rem;
+  min-width: 4.5rem;
+  padding: 0.6rem 0.5rem;
+}
+
+.count-box span { display: block; font-size: 1.6rem; font-weight: 800; }
+.count-box small { text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.1em; }
+
+.hero-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+.btn {
+  display: inline-block;
+  padding: 0.7rem 1.25rem;
+  border-radius: 999px;
+  font-weight: 700;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.btn-primary { background: #b91c1c; color: var(--blanco); }
+.btn-primary:hover { background: #991b1b; }
+.btn-ghost { background: transparent; color: var(--blanco); border: 2px solid var(--blanco); }
+.btn-whatsapp { background: #25d366; color: #062e16; }
+
+main { max-width: 56rem; margin: 0 auto; padding: 0 1.25rem 2rem; }
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
+  gap: 1rem;
+  margin: -1.5rem 0 2rem;
+}
+
+.card {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.card h2 { margin: 0 0 0.25rem; font-size: 1rem; }
+.card p { margin: 0; font-weight: 600; }
+
+.section { margin-bottom: 2.5rem; }
+.section h2 { margin-bottom: 0.25rem; }
+.muted { color: var(--muted); }
+
+.form {
+  display: grid;
+  gap: 0.9rem;
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  margin-top: 1rem;
+}
+
+.form label { display: grid; gap: 0.3rem; font-weight: 600; }
+
+.form input,
+.form select,
+.form textarea {
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--borde);
+  border-radius: 0.6rem;
+  font-size: 1rem;
+  width: 100%;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.stats { margin-top: 1rem; }
+
+.lista { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: 0.6rem; }
+
+.lista li {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.badge {
+  background: var(--verde-claro);
+  color: var(--verde);
+  border-radius: 999px;
+  padding: 0.15rem 0.7rem;
+  font-size: 0.85rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.badge.no { background: #fee2e2; color: #991b1b; }
+
+.mini-btn {
+  background: var(--terracota-suave);
+  color: var(--terracota);
+  border: none;
+  border-radius: 999px;
+  padding: 0.4rem 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.idea-item { flex-direction: column; align-items: flex-start; }
+.idea-item > div { display: flex; justify-content: space-between; gap: 1rem; width: 100%; flex-wrap: wrap; }
+.idea-foto { max-width: 100%; border-radius: 0.6rem; margin-top: 0.5rem; }
+
+.agenda { padding-left: 1.25rem; display: grid; gap: 0.5rem; }
+.agenda li::marker { font-weight: 800; color: var(--terracota); }
+
+footer {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+  padding: 1.5rem 1rem 2.5rem;
+}
+
+footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem; }
+
+  </style>
+</head>
+<body>
+  <header class="hero">
+    <p class="hero-eyebrow" id="empresa">La Fisher MX3</p>
+    <h1 id="titulo">🎄 Evento Navideño</h1>
+    <p class="hero-sub">Una noche para convivir en equipo: antojitos, intercambio y buena compañía.</p>
+
+    <div class="countdown" aria-label="Cuenta regresiva">
+      <div class="count-box"><span id="cd-dias">--</span><small>días</small></div>
+      <div class="count-box"><span id="cd-horas">--</span><small>horas</small></div>
+      <div class="count-box"><span id="cd-min">--</span><small>min</small></div>
+      <div class="count-box"><span id="cd-seg">--</span><small>seg</small></div>
+    </div>
+
+    <div class="hero-actions">
+      <a class="btn btn-primary" href="#confirmar">Confirmar asistencia</a>
+      <a class="btn btn-ghost" href="#llevar">¿Qué llevo?</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="cards">
+      <article class="card">
+        <h2>📅 Fecha</h2>
+        <p id="fecha-texto">Fecha por definir</p>
+      </article>
+      <article class="card">
+        <h2>🕕 Hora</h2>
+        <p id="hora-texto">6:00 PM</p>
+      </article>
+      <article class="card">
+        <h2>📍 Lugar</h2>
+        <p id="lugar-texto">Por confirmar</p>
+        <p class="muted" id="direccion-texto"></p>
+      </article>
+      <article class="card">
+        <h2>💰 Cooperación</h2>
+        <p id="cooperacion-texto">$150 por persona</p>
+      </article>
+    </section>
+
+    <section id="confirmar" class="section">
+      <h2>✅ Confirma tu asistencia</h2>
+      <p class="muted">Llena el formulario y tu nombre aparecerá en la lista de confirmados.</p>
+
+      <form id="rsvp-form" class="form">
+        <label>
+          Tu nombre
+          <input type="text" id="rsvp-nombre" required placeholder="Ej. Mauricio" />
+        </label>
+        <label>
+          ¿Asistes?
+          <select id="rsvp-asiste">
+            <option value="si">¡Sí, ahí nos vemos!</option>
+            <option value="no">No puedo esta vez</option>
+          </select>
+        </label>
+        <label>
+          Acompañantes
+          <input type="number" id="rsvp-acompanantes" min="0" max="10" value="0" />
+        </label>
+        <label>
+          ¿Qué llevas? (opcional)
+          <input type="text" id="rsvp-lleva" placeholder="Ej. Un postre, refrescos..." />
+        </label>
+        <button class="btn btn-primary" type="submit">Guardar mi confirmación</button>
+      </form>
+
+      <div class="stats">
+        <p><strong id="total-si">0</strong> confirmados · <strong id="total-personas">0</strong> personas en total · <strong id="total-no">0</strong> no pueden</p>
+      </div>
+
+      <ul id="lista-confirmados" class="lista"></ul>
+      <p class="muted" id="lista-vacia">Aún no hay confirmados. ¡Sé el primero!</p>
+    </section>
+
+    <section id="llevar" class="section">
+      <h2>🧺 ¿Qué hace falta?</h2>
+      <p class="muted">Apúntate con algo para que no se repita ni falte nada. Toca “Yo lo llevo” y escribe tu nombre, o anota algo libremente aquí abajo. Todo queda guardado.</p>
+      <ul id="lista-llevar" class="lista"></ul>
+
+      <form id="llevar-form" class="form">
+        <label>
+          Tu nombre
+          <input type="text" id="llevar-nombre" required placeholder="Ej. Mauricio" />
+        </label>
+        <label>
+          ¿Qué llevas?
+          <input type="text" id="llevar-que" required placeholder="Ej. 2 kilos de carne asada" />
+        </label>
+        <button class="btn btn-primary" type="submit">Apuntarme con esto</button>
+      </form>
+
+      <h3>Ya se apuntaron con algo</h3>
+      <ul id="lista-apuntados" class="lista"></ul>
+      <p class="muted" id="apuntados-vacio">Aún nadie se ha apuntado. ¡Sé el primero!</p>
+    </section>
+
+    <section class="section" id="ideas">
+      <h2>💡 Ideas para el evento</h2>
+      <p class="muted">La fecha aún no se define. Sube tu idea: lugar, comida, actividad, música, lo que se te ocurra.</p>
+
+      <form id="ideas-form" class="form">
+        <label>
+          Tu nombre
+          <input type="text" id="idea-nombre" required placeholder="Ej. Mauricio" />
+        </label>
+        <label>
+          Tu idea
+          <textarea id="idea-texto" rows="3" required placeholder="Ej. Que sea en un salón con alberca y hagamos intercambio de regalos..."></textarea>
+        </label>
+        <label>
+          Foto de tu idea (opcional)
+          <input type="file" id="idea-foto" accept="image/*" />
+        </label>
+        <button class="btn btn-primary" type="submit">Subir mi idea</button>
+      </form>
+
+      <ul id="lista-ideas" class="lista"></ul>
+      <p class="muted" id="ideas-vacia">Aún no hay ideas. ¡Sube la primera!</p>
+    </section>
+
+    <section class="section">
+      <h2>🗓️ Agenda del día</h2>
+      <ol class="agenda" id="agenda"></ol>
+    </section>
+
+    <section class="section">
+      <h2>📣 Comparte la invitación</h2>
+      <p class="muted">Pásales el enlace de esta página a tus colegas por WhatsApp.</p>
+      <a class="btn btn-whatsapp" id="btn-whatsapp" href="#" target="_blank" rel="noopener">Compartir por WhatsApp</a>
+    </section>
+  </main>
+
+  <footer>
+    <p>Hecho con ❤️ para el equipo · Edita los datos del evento en la sección CONFIG al inicio del script de esta misma página.</p>
+  </footer>
+
+  <script>
+// ============================================================
+//  CONFIG — edita aquí los datos del evento y guarda el archivo
+// ============================================================
+const CONFIG = {
+  empresa: "La Fisher MX3",
+  titulo: "🎄 Evento Navideño",
+  subtitulo: "Una noche para convivir en equipo: antojitos, intercambio y buena compañía.",
+  fechaISO: "", // fecha aún por definir; cuando se defina, ponla aquí
+                // en formato "2026-12-18T18:00:00-08:00" y la cuenta regresiva aparece sola
+  fechaTexto: "Fecha por definir",
+  hora: "6:00 PM",
+  lugar: "Por confirmar",
+  direccion: "",
+  cooperacion: "$150 por persona",
+  agenda: [
+    "6:00 PM – Bienvenida y ponche",
+    "6:30 PM – Convivio, antojitos y ponche",
+    "7:30 PM – Intercambio de regalos",
+    "8:30 PM – Rifa y juegos",
+    "9:00 PM – Karaoke y villancicos",
+    "10:00 PM – Brindis y foto del equipo",
+  ],
+  // Cosas que hacen falta: cada quien se apunta con una
+  llevar: [
+    "Ponche navideño",
+    "Tamales",
+    "Pavo / pierna",
+    "Ensalada de manzana",
+    "Buñuelos",
+    "Refrescos",
+    "Hielo",
+    "Desechables",
+    "Piñata y dulces",
+    "Postre",
+  ],
+};
+
+// ---------------- Datos del evento en la página ----------------
+document.getElementById("empresa").textContent = CONFIG.empresa;
+document.getElementById("titulo").textContent = CONFIG.titulo;
+document.querySelector(".hero-sub").textContent = CONFIG.subtitulo;
+document.getElementById("fecha-texto").textContent = CONFIG.fechaTexto;
+document.getElementById("hora-texto").textContent = CONFIG.hora;
+document.getElementById("lugar-texto").textContent = CONFIG.lugar;
+document.getElementById("direccion-texto").textContent = CONFIG.direccion;
+document.getElementById("cooperacion-texto").textContent = CONFIG.cooperacion;
+document.title = CONFIG.titulo + " – " + CONFIG.empresa;
+
+// ---------------- Cuenta regresiva ----------------
+// Si la fecha aún no se define, se oculta la cuenta regresiva.
+const countdownEl = document.querySelector(".countdown");
+if (!CONFIG.fechaISO) {
+  countdownEl.style.display = "none";
+} else {
+  const fechaEvento = new Date(CONFIG.fechaISO);
+  function actualizarCuenta() {
+    const ahora = new Date();
+    let diff = fechaEvento - ahora;
+    if (diff < 0) diff = 0;
+    const dias = Math.floor(diff / 86400000);
+    const horas = Math.floor(diff / 3600000) % 24;
+    const min = Math.floor(diff / 60000) % 60;
+    const seg = Math.floor(diff / 1000) % 60;
+    document.getElementById("cd-dias").textContent = dias;
+    document.getElementById("cd-horas").textContent = String(horas).padStart(2, "0");
+    document.getElementById("cd-min").textContent = String(min).padStart(2, "0");
+    document.getElementById("cd-seg").textContent = String(seg).padStart(2, "0");
+  }
+  actualizarCuenta();
+  setInterval(actualizarCuenta, 1000);
+}
+
+// ---------------- Agenda ----------------
+const agendaEl = document.getElementById("agenda");
+CONFIG.agenda.forEach((item) => {
+  const li = document.createElement("li");
+  li.textContent = item;
+  agendaEl.appendChild(li);
+});
+
+// ---------------- Confirmaciones (se guardan en el navegador) ----------------
+const RSVP_KEY = "fisher-navidad-rsvp";
+const LLEVAR_KEY = "fisher-navidad-llevar";
+
+function cargar(clave, defecto) {
+  try {
+    return JSON.parse(localStorage.getItem(clave)) || defecto;
+  } catch {
+    return defecto;
+  }
+}
+function guardar(clave, valor) {
+  localStorage.setItem(clave, JSON.stringify(valor));
+}
+
+let confirmados = cargar(RSVP_KEY, []);
+let llevarAsignado = cargar(LLEVAR_KEY, {});
+
+const listaEl = document.getElementById("lista-confirmados");
+const vaciaEl = document.getElementById("lista-vacia");
+
+function pintarConfirmados() {
+  listaEl.innerHTML = "";
+  const si = confirmados.filter((c) => c.asiste === "si");
+  const no = confirmados.filter((c) => c.asiste === "no");
+  const personas = si.reduce((t, c) => t + 1 + (c.acompanantes || 0), 0);
+  document.getElementById("total-si").textContent = si.length;
+  document.getElementById("total-personas").textContent = personas;
+  document.getElementById("total-no").textContent = no.length;
+  vaciaEl.style.display = confirmados.length ? "none" : "block";
+
+  confirmados.forEach((c) => {
+    const li = document.createElement("li");
+    const texto = document.createElement("span");
+    texto.textContent =
+      c.nombre +
+      (c.acompanantes ? ` (+${c.acompanantes})` : "") +
+      (c.lleva ? ` — lleva: ${c.lleva}` : "");
+    const badge = document.createElement("span");
+    badge.className = "badge" + (c.asiste === "no" ? " no" : "");
+    badge.textContent = c.asiste === "si" ? "Confirmado" : "No asiste";
+    li.append(texto, badge);
+    listaEl.appendChild(li);
+  });
+}
+
+document.getElementById("rsvp-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const nombre = document.getElementById("rsvp-nombre").value.trim();
+  if (!nombre) return;
+  const registro = {
+    nombre,
+    asiste: document.getElementById("rsvp-asiste").value,
+    acompanantes: parseInt(document.getElementById("rsvp-acompanantes").value, 10) || 0,
+    lleva: document.getElementById("rsvp-lleva").value.trim(),
+  };
+  const i = confirmados.findIndex(
+    (c) => c.nombre.toLowerCase() === nombre.toLowerCase()
+  );
+  if (i >= 0) confirmados[i] = registro;
+  else confirmados.push(registro);
+  guardar(RSVP_KEY, confirmados);
+  pintarConfirmados();
+  e.target.reset();
+  document.getElementById("rsvp-acompanantes").value = 0;
+  alert("¡Gracias, " + nombre + "! Tu confirmación quedó guardada. 🎄");
+});
+
+// ---------------- ¿Qué hace falta? ----------------
+const llevarEl = document.getElementById("lista-llevar");
+function pintarLlevar() {
+  llevarEl.innerHTML = "";
+  CONFIG.llevar.forEach((item) => {
+    const li = document.createElement("li");
+    const nombre = document.createElement("span");
+    nombre.textContent = "🎁 " + item;
+    const quien = llevarAsignado[item];
+    if (quien) {
+      const badge = document.createElement("span");
+      badge.className = "badge";
+      badge.textContent = "Lo lleva: " + quien;
+      li.append(nombre, badge);
+    } else {
+      const btn = document.createElement("button");
+      btn.className = "mini-btn";
+      btn.textContent = "Yo lo llevo";
+      btn.addEventListener("click", () => {
+        const persona = prompt("¿Tu nombre?", "");
+        if (persona && persona.trim()) {
+          llevarAsignado[item] = persona.trim();
+          guardar(LLEVAR_KEY, llevarAsignado);
+          pintarLlevar();
+        }
+      });
+      li.append(nombre, btn);
+    }
+    llevarEl.appendChild(li);
+  });
+}
+
+// ---------------- Apuntarse con algo (lista libre, queda guardado) ----------------
+const APUNTADOS_KEY = "fisher-navidad-apuntados";
+let apuntados = cargar(APUNTADOS_KEY, []);
+const listaApuntadosEl = document.getElementById("lista-apuntados");
+const apuntadosVacioEl = document.getElementById("apuntados-vacio");
+
+function pintarApuntados() {
+  listaApuntadosEl.innerHTML = "";
+  apuntadosVacioEl.style.display = apuntados.length ? "none" : "block";
+  apuntados.forEach((a) => {
+    const li = document.createElement("li");
+    const texto = document.createElement("span");
+    texto.textContent = "🧺 " + a.que;
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = "Lo lleva: " + a.nombre;
+    li.append(texto, badge);
+    listaApuntadosEl.appendChild(li);
+  });
+}
+
+document.getElementById("llevar-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const nombre = document.getElementById("llevar-nombre").value.trim();
+  const que = document.getElementById("llevar-que").value.trim();
+  if (!nombre || !que) return;
+  apuntados.push({ nombre, que });
+  guardar(APUNTADOS_KEY, apuntados);
+  pintarApuntados();
+  e.target.reset();
+  alert("¡Gracias, " + nombre + "! Quedó guardado que llevas: " + que);
+});
+
+// ---------------- Compartir por WhatsApp ----------------
+const textoShare =
+  "🎄 ¡Estás invitado al " +
+  CONFIG.titulo.replace("🎄 ", "") +
+  " de " +
+  CONFIG.empresa +
+  "! " +
+  CONFIG.fechaTexto +
+  ", " +
+  CONFIG.hora +
+  ", " +
+  CONFIG.lugar +
+  ". Confirma tu asistencia aquí: " +
+  location.href;
+document.getElementById("btn-whatsapp").href =
+  "https://wa.me/?text=" + encodeURIComponent(textoShare);
+
+// ---------------- Ideas para el evento ----------------
+const IDEAS_KEY = "fisher-navidad-ideas";
+let ideas = cargar(IDEAS_KEY, []);
+const listaIdeasEl = document.getElementById("lista-ideas");
+const ideasVaciaEl = document.getElementById("ideas-vacia");
+
+function pintarIdeas() {
+  listaIdeasEl.innerHTML = "";
+  ideasVaciaEl.style.display = ideas.length ? "none" : "block";
+  ideas.forEach((idea) => {
+    const li = document.createElement("li");
+    li.className = "idea-item";
+    const cont = document.createElement("div");
+    const texto = document.createElement("span");
+    texto.textContent = "💡 " + idea.texto;
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = idea.nombre;
+    cont.append(texto, badge);
+    li.appendChild(cont);
+    if (idea.foto) {
+      const img = document.createElement("img");
+      img.src = idea.foto;
+      img.alt = "Foto de la idea de " + idea.nombre;
+      img.className = "idea-foto";
+      li.appendChild(img);
+    }
+    listaIdeasEl.appendChild(li);
+  });
+}
+
+document.getElementById("ideas-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const nombre = document.getElementById("idea-nombre").value.trim();
+  const texto = document.getElementById("idea-texto").value.trim();
+  if (!nombre || !texto) return;
+  const archivo = document.getElementById("idea-foto").files[0];
+
+  const terminar = (foto) => {
+    ideas.push({ nombre, texto, foto: foto || "" });
+    try {
+      guardar(IDEAS_KEY, ideas);
+    } catch {
+      ideas.pop();
+      alert("La foto es muy grande para guardarla en el navegador. Intenta con una foto más pequeña.");
+      return;
+    }
+    pintarIdeas();
+    e.target.reset();
+    alert("¡Gracias, " + nombre + "! Tu idea quedó publicada. 💡");
+  };
+
+  if (!archivo) {
+    terminar("");
+    return;
+  }
+  // La foto se achica antes de guardarse para que quepa en el navegador.
+  const lector = new FileReader();
+  lector.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const max = 800;
+      const escala = Math.min(1, max / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * escala);
+      canvas.height = Math.round(img.height * escala);
+      canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      terminar(canvas.toDataURL("image/jpeg", 0.75));
+    };
+    img.src = lector.result;
+  };
+  lector.readAsDataURL(archivo);
+});
+
+pintarConfirmados();
+pintarLlevar();
+pintarApuntados();
+pintarIdeas();
+
+  </script>
+</body>
+</html>
