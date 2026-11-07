@@ -294,6 +294,13 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
         </label>
         <button id="btn-confirmar-codigo" class="btn btn-primary" type="button" style="display:none">Confirmar código</button>
         <p id="acceso-mensaje" class="muted"></p>
+        <p class="muted">¿Eres administrador? También puedes entrar con contraseña, sin SMS.</p>
+        <label>
+          Contraseña de administrador
+          <input type="password" id="acceso-clave" placeholder="Contraseña" autocomplete="current-password" />
+        </label>
+        <button id="btn-entrar-clave" class="btn btn-secondary" type="button">Entrar como administrador</button>
+        <p id="acceso-clave-mensaje" class="muted"></p>
       </div>
       <div id="acceso-si" class="form" style="display:none">
         <p>Sesión iniciada como <strong id="acceso-numero"></strong>. Ya puedes confirmar, apuntarte y subir ideas.</p>
@@ -357,6 +364,20 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
       <h3>Encuesta</h3>
       <p class="muted" id="panel-encuesta-info"></p>
       <button id="btn-reiniciar-encuesta" class="btn btn-secondary" type="button">Reiniciar encuesta (borrar votos)</button>
+
+      <h3>Contraseña de administrador</h3>
+      <p class="muted" id="panel-clave-info"></p>
+      <form id="panel-clave-form" class="form">
+        <label>
+          Nueva contraseña
+          <input type="password" id="panel-clave-nueva" placeholder="Mínimo 6 caracteres" />
+        </label>
+        <label>
+          Repite la contraseña
+          <input type="password" id="panel-clave-repite" placeholder="Repite la contraseña" />
+        </label>
+        <button class="btn btn-primary" type="submit">Guardar contraseña</button>
+      </form>
     </section>
 
     <p class="aviso" id="aviso-nube" style="display:none">Modo local: lo que guardes solo se ve en tu celular. Para que todos vean las confirmaciones, los apuntados y las ideas con foto, activa el guardado compartido (Firebase, gratis) siguiendo el README.</p>
@@ -583,6 +604,10 @@ const CONFIG = {
     "+526645284884", // Luis Alberto
     "+526642766494", // Betin (Roberto Elionali)
   ],
+  // Contraseña temporal de administrador (solo para entrar la primera vez
+  // sin SMS). Es pública en el código: el admin debe cambiarla en el panel
+  // y a partir de ahí solo funciona la que él configure (se guarda el hash).
+  claveInicial: "3pv9hpggg3",
   // Nombres conocidos de algunos números (para mostrarlos en el panel).
   nombresNumeros: {
     "+526645793319": "Roberto Murillo",
@@ -1354,7 +1379,35 @@ function nombreDeNumero(n) {
 }
 
 function esAdmin() {
-  return !!sesionNumero && CONFIG.admins.includes(sesionNumero);
+  return sesionAdminClave || (!!sesionNumero && CONFIG.admins.includes(sesionNumero));
+}
+
+// Contraseña de administrador: se guarda solo su hash en la nube.
+// La sesión por contraseña vive mientras la pestaña esté abierta.
+function leerSesionClave() {
+  try { return sessionStorage.getItem("fisher-admin-clave") === "1"; } catch (e) { return false; }
+}
+
+function guardarSesionClave(valor) {
+  try {
+    if (valor) sessionStorage.setItem("fisher-admin-clave", "1");
+    else sessionStorage.removeItem("fisher-admin-clave");
+  } catch (e) {}
+}
+
+let sesionAdminClave = leerSesionClave();
+
+async function hashClave(clave) {
+  if (window.crypto && crypto.subtle) {
+    const datos = await crypto.subtle.digest(
+      "SHA-256",
+      new TextEncoder().encode("fisher-admin:" + clave)
+    );
+    return Array.from(new Uint8Array(datos))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+  }
+  return null;
 }
 
 function validarSesion() {
@@ -1492,6 +1545,12 @@ function pintarPanel() {
   const total = Object.values(encuesta).reduce((a, b) => a + (b || 0), 0);
   document.getElementById("panel-encuesta-info").textContent =
     total + " votos en total (ronda " + rondaEncuesta() + "). Al reiniciar se borran los votos y todos pueden votar de nuevo.";
+
+  // Contraseña de administrador: si ya hay una personalizada, la temporal ya no sirve.
+  const hayClave = !!(Store.datos.admin && Store.datos.admin.claveHash);
+  document.getElementById("panel-clave-info").textContent = hayClave
+    ? "Ya tienes una contraseña personalizada configurada. Aquí la puedes cambiar."
+    : "Aún usas la contraseña temporal. Cámbiala aquí por una tuya.";
 }
 
 document.getElementById("panel-numero-form").addEventListener("submit", (e) => {
@@ -1552,6 +1611,36 @@ document.getElementById("panel-llevar-form").addEventListener("submit", (e) => {
   repintarTodo();
 });
 
+document.getElementById("panel-clave-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  if (!esAdmin()) return;
+  const nueva = document.getElementById("panel-clave-nueva").value;
+  const repite = document.getElementById("panel-clave-repite").value;
+  if (nueva.length < 6) {
+    alert("La contraseña debe tener al menos 6 caracteres.");
+    return;
+  }
+  if (nueva !== repite) {
+    alert("Las contraseñas no coinciden.");
+    return;
+  }
+  const hash = await hashClave(nueva);
+  if (!hash) {
+    alert("No se pudo guardar la contraseña desde aquí. Inténtalo desde la página publicada (https).");
+    return;
+  }
+  if (Store.nube) {
+    Store.db.child("admin/claveHash").set(hash);
+  } else {
+    if (!Store.datos.admin) Store.datos.admin = {};
+    Store.datos.admin.claveHash = hash;
+    Store.guardar("admin");
+  }
+  e.target.reset();
+  alert("Contraseña de administrador guardada. La contraseña temporal ya no funciona.");
+  repintarTodo();
+});
+
 document.getElementById("btn-reiniciar-encuesta").addEventListener("click", () => {
   if (!esAdmin()) return;
   if (!confirm("¿Borrar todos los votos de la encuesta? Todos podrán votar de nuevo.")) return;
@@ -1602,11 +1691,12 @@ function crearVerificador() {
 }
 
 function actualizarAcceso() {
-  const autenticado = !!sesionNumero;
+  const autenticado = !!sesionNumero || sesionAdminClave;
   document.getElementById("acceso-no").style.display = autenticado ? "none" : "grid";
   document.getElementById("acceso-si").style.display = autenticado ? "grid" : "none";
   if (autenticado) {
-    document.getElementById("acceso-numero").textContent = sesionNumero;
+    document.getElementById("acceso-numero").textContent =
+      sesionNumero || "administrador (contraseña)";
   }
   // Lo editable solo se puede usar con sesión verificada.
   ["rsvp-form", "llevar-form", "ideas-form"].forEach((id) => {
@@ -1684,7 +1774,48 @@ function initAuth() {
   });
 
   document.getElementById("btn-salir").addEventListener("click", () => {
+    sesionAdminClave = false;
+    guardarSesionClave(false);
     firebase.auth().signOut();
+    repintarTodo();
+  });
+
+  // Entrada de administrador por contraseña (sin SMS).
+  document.getElementById("btn-entrar-clave").addEventListener("click", async () => {
+    const clave = document.getElementById("acceso-clave").value;
+    const msgEl = document.getElementById("acceso-clave-mensaje");
+    if (!clave) return;
+    if (Store.nube && !adminCargado) {
+      msgEl.textContent = "Cargando, espera un momento e inténtalo de nuevo.";
+      return;
+    }
+    msgEl.textContent = "Verificando...";
+    const hashGuardado = Store.datos.admin && Store.datos.admin.claveHash;
+    if (hashGuardado) {
+      const hash = await hashClave(clave);
+      if (!hash) {
+        msgEl.textContent = "La contraseña solo funciona desde la página publicada (https).";
+        return;
+      }
+      if (hash === hashGuardado) {
+        sesionAdminClave = true;
+        guardarSesionClave(true);
+        msgEl.textContent = "";
+        document.getElementById("acceso-clave").value = "";
+        repintarTodo();
+      } else {
+        msgEl.textContent = "Contraseña incorrecta.";
+      }
+    } else if (clave === CONFIG.claveInicial) {
+      sesionAdminClave = true;
+      guardarSesionClave(true);
+      msgEl.textContent = "";
+      document.getElementById("acceso-clave").value = "";
+      repintarTodo();
+      alert("Entraste con la contraseña temporal. Cámbiala ahora en el Panel de control, en Contraseña de administrador.");
+    } else {
+      msgEl.textContent = "Contraseña incorrecta. Si aún no hay una configurada, entra por SMS y configúrala en el panel.";
+    }
   });
 }
 
