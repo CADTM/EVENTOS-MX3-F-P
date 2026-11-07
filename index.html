@@ -89,6 +89,15 @@ body {
 
 .convivir-botones { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 1rem 0; }
 
+.panel {
+  border: 2px solid var(--terracota);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  background: var(--blanco);
+}
+
+.panel h3 { margin: 1.5rem 0 0.25rem; }
+
 .reto-texto {
   font-size: 1.15rem;
   font-weight: 600;
@@ -290,6 +299,64 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
         <p>Sesión iniciada como <strong id="acceso-numero"></strong>. Ya puedes confirmar, apuntarte y subir ideas.</p>
         <button id="btn-salir" class="btn btn-secondary" type="button">Salir</button>
       </div>
+    </section>
+
+    <section class="section panel" id="panel" style="display:none">
+      <h2>Panel de control</h2>
+      <p class="muted">Solo lo ven los administradores. Aquí se registra gente y se editan los datos del evento sin tener que pedirle nada a Fel.</p>
+
+      <h3>Registrar a alguien</h3>
+      <form id="panel-numero-form" class="form">
+        <label>
+          Nombre
+          <input type="text" id="panel-numero-nombre" placeholder="Ej. Rick Rocha" />
+        </label>
+        <label>
+          Número de WhatsApp
+          <input type="tel" id="panel-numero-telefono" placeholder="Ej. 664 123 4567" />
+        </label>
+        <button class="btn btn-primary" type="submit">Registrar número</button>
+      </form>
+      <ul id="panel-numeros" class="lista"></ul>
+
+      <h3>Datos del evento</h3>
+      <form id="panel-evento-form" class="form">
+        <label>
+          Fecha
+          <input type="text" id="panel-evento-fecha" />
+        </label>
+        <label>
+          Hora
+          <input type="text" id="panel-evento-hora" />
+        </label>
+        <label>
+          Lugar
+          <input type="text" id="panel-evento-lugar" />
+        </label>
+        <label>
+          Dirección
+          <input type="text" id="panel-evento-direccion" />
+        </label>
+        <label>
+          Cooperación
+          <input type="text" id="panel-evento-cooperacion" />
+        </label>
+        <button class="btn btn-primary" type="submit">Guardar datos del evento</button>
+      </form>
+
+      <h3>¿Qué hace falta?</h3>
+      <form id="panel-llevar-form" class="form">
+        <label>
+          Agregar algo a la lista
+          <input type="text" id="panel-llevar-texto" placeholder="Ej. Servilletas" />
+        </label>
+        <button class="btn btn-primary" type="submit">Agregar a la lista</button>
+      </form>
+      <ul id="panel-llevar-extras" class="lista"></ul>
+
+      <h3>Encuesta</h3>
+      <p class="muted" id="panel-encuesta-info"></p>
+      <button id="btn-reiniciar-encuesta" class="btn btn-secondary" type="button">Reiniciar encuesta (borrar votos)</button>
     </section>
 
     <p class="aviso" id="aviso-nube" style="display:none">Modo local: lo que guardes solo se ve en tu celular. Para que todos vean las confirmaciones, los apuntados y las ideas con foto, activa el guardado compartido (Firebase, gratis) siguiendo el README.</p>
@@ -509,6 +576,19 @@ const CONFIG = {
     "+526642766494", // Betin
     "+524431327072", // Mauricio
   ],
+  // Administradores del panel de control: solo estos números ven el panel
+  // y pueden registrar/quitar personas y editar los datos del evento.
+  admins: [
+    "+524431327072", // Mauricio
+    "+526645284884", // Luis Alberto
+  ],
+  // Nombres conocidos de algunos números (para mostrarlos en el panel).
+  nombresNumeros: {
+    "+526645793319": "Roberto Murillo",
+    "+526645284884": "Luis Alberto",
+    "+526642766494": "Betin",
+    "+524431327072": "Mauricio",
+  },
   // Retos divertidos del equipo: uno distinto cada día para todos.
   retos: [
     "Trae tu taza más fea del almacén y presume por qué es la mejor.",
@@ -687,11 +767,11 @@ async function fotoPermitida(canvas) {
 //  todos ven lo mismo en tiempo real. Si no, se guarda en el
 //  navegador de cada persona (modo local).
 // ============================================================
-const COLECCIONES = ["rsvp", "apuntados", "llevar", "ideas", "encuesta"];
+const COLECCIONES = ["rsvp", "apuntados", "llevar", "ideas", "encuesta", "admin"];
 const LS_PREFIX = "fisher-navidad-";
 
 const Store = {
-  datos: { rsvp: [], apuntados: [], llevar: {}, ideas: [], encuesta: {} },
+  datos: { rsvp: [], apuntados: [], llevar: {}, ideas: [], encuesta: {}, admin: {} },
   nube: false,
   db: null,
 
@@ -705,8 +785,9 @@ const Store = {
         this.db.on("value", (snap) => {
           const v = snap.val() || {};
           COLECCIONES.forEach((c) => {
-            this.datos[c] = v[c] || (c === "llevar" || c === "encuesta" ? {} : []);
+            this.datos[c] = v[c] || (c === "llevar" || c === "encuesta" || c === "admin" ? {} : []);
           });
+          adminCargado = true;
           repintarTodo();
         });
       } catch (e) {
@@ -724,6 +805,7 @@ const Store = {
       });
       const aviso = document.getElementById("aviso-nube");
       if (aviso) aviso.style.display = "block";
+      adminCargado = true; // en modo local la lista de CONFIG es la fuente
     }
   },
 
@@ -761,12 +843,42 @@ const Store = {
 document.getElementById("empresa").textContent = CONFIG.empresa;
 document.getElementById("titulo").textContent = CONFIG.titulo;
 document.querySelector(".hero-sub").textContent = CONFIG.subtitulo;
-document.getElementById("fecha-texto").textContent = CONFIG.fechaTexto;
-document.getElementById("hora-texto").textContent = CONFIG.hora;
-document.getElementById("lugar-texto").textContent = CONFIG.lugar;
-document.getElementById("direccion-texto").textContent = CONFIG.direccion;
-document.getElementById("cooperacion-texto").textContent = CONFIG.cooperacion;
-document.title = CONFIG.titulo + " – " + CONFIG.empresa;
+
+// Datos del evento: el panel de control puede cambiarlos y se guardan en
+// la nube; si no hay cambios, se usan los de CONFIG.
+function datosEvento() {
+  const enNube = Store.datos.admin && Store.datos.admin.evento;
+  return {
+    fechaTexto: (enNube && enNube.fechaTexto) || CONFIG.fechaTexto,
+    hora: (enNube && enNube.hora) || CONFIG.hora,
+    lugar: (enNube && enNube.lugar) || CONFIG.lugar,
+    direccion: (enNube && enNube.direccion) || CONFIG.direccion,
+    cooperacion: (enNube && enNube.cooperacion) || CONFIG.cooperacion,
+  };
+}
+
+function pintarEvento() {
+  const ev = datosEvento();
+  document.getElementById("fecha-texto").textContent = ev.fechaTexto;
+  document.getElementById("hora-texto").textContent = ev.hora;
+  document.getElementById("lugar-texto").textContent = ev.lugar;
+  document.getElementById("direccion-texto").textContent = ev.direccion;
+  document.getElementById("cooperacion-texto").textContent = ev.cooperacion;
+  document.title = CONFIG.titulo + " – " + CONFIG.empresa;
+  const textoShare =
+    "¡Estás invitado al evento de convivencia de " +
+    CONFIG.empresa +
+    "! " +
+    ev.fechaTexto +
+    ", " +
+    ev.hora +
+    ", " +
+    ev.lugar +
+    ". Confirma tu asistencia aquí: " +
+    location.href;
+  document.getElementById("btn-whatsapp").href =
+    "https://wa.me/?text=" + encodeURIComponent(textoShare);
+}
 
 // ---------------- Cuenta regresiva ----------------
 // Si la fecha aún no se define, se oculta la cuenta regresiva.
@@ -883,10 +995,17 @@ document.getElementById("rsvp-form").addEventListener("submit", (e) => {
 // ---------------- ¿Qué hace falta? ----------------
 const llevarEl = document.getElementById("lista-llevar");
 
+// La lista base de CONFIG más lo que agreguen los admins desde el panel.
+function llevarCompleto() {
+  const extras = (Store.datos.admin && Store.datos.admin.llevarExtras) || {};
+  const textos = Object.values(extras).map((e) => (e && e.texto) || e);
+  return CONFIG.llevar.concat(textos.filter(Boolean));
+}
+
 function pintarLlevar() {
   const llevarAsignado = Store.get("llevar");
   llevarEl.innerHTML = "";
-  CONFIG.llevar.forEach((item) => {
+  llevarCompleto().forEach((item) => {
     const li = document.createElement("li");
     const nombre = document.createElement("span");
     nombre.textContent = item;
@@ -1107,10 +1226,23 @@ document.getElementById("btn-otro-reto").addEventListener("click", () => {
 // Encuesta en vivo: un voto por persona, resultados para todos al instante.
 const VOTO_KEY = "fisher-encuesta-voto";
 
+// La ronda cambia cada vez que un admin reinicia la encuesta; así todos
+// pueden votar de nuevo aunque ya hayan votado en la ronda anterior.
+function rondaEncuesta() {
+  return (Store.datos.admin && Store.datos.admin.encuestaRonda) || 1;
+}
+
+function miVotoActual() {
+  const guardado = localStorage.getItem(VOTO_KEY) || "";
+  const partes = guardado.split(":");
+  if (partes.length === 2 && partes[0] === String(rondaEncuesta())) return partes[1];
+  return null;
+}
+
 function pintarEncuesta() {
   const cont = document.getElementById("encuesta-opciones");
   const encuesta = Store.get("encuesta");
-  const miVoto = localStorage.getItem(VOTO_KEY);
+  const miVoto = miVotoActual();
   const total = CONFIG.encuestaOpciones.reduce(
     (acc, o) => acc + (encuesta[o.id] || 0),
     0
@@ -1132,8 +1264,8 @@ function pintarEncuesta() {
         alert("Primero verifica tu número en la sección Acceso del equipo.");
         return;
       }
-      if (localStorage.getItem(VOTO_KEY)) return;
-      localStorage.setItem(VOTO_KEY, opcion.id);
+      if (miVotoActual()) return;
+      localStorage.setItem(VOTO_KEY, rondaEncuesta() + ":" + opcion.id);
       Store.votarEncuesta(opcion.id);
       celebrar();
     });
@@ -1195,6 +1327,248 @@ function pintarPuntos() {
   });
 }
 
+// ---------------- Panel de control (solo administradores) ----------------
+// Los números permitidos viven en la nube (admin/numeros) para que el panel
+// pueda registrar y quitar gente sin tocar el código. Si la nube aún no
+// tiene lista, se usa la de CONFIG.
+let adminCargado = false;
+let usuarioTelefono = null; // número autenticado, aún sin validar contra la lista
+let numerosSembrados = false;
+
+function numerosEfectivos() {
+  const enNube = Store.datos.admin && Store.datos.admin.numeros;
+  if (enNube && Object.keys(enNube).length) {
+    return Object.keys(enNube).map((k) => normalizarNumero(k));
+  }
+  return CONFIG.numerosPermitidos.slice();
+}
+
+function nombreDeNumero(n) {
+  const enNube = Store.datos.admin && Store.datos.admin.numeros;
+  if (enNube) {
+    const clave = n.replace(/\D/g, "");
+    if (enNube[clave] && enNube[clave].nombre) return enNube[clave].nombre;
+  }
+  return (CONFIG.nombresNumeros && CONFIG.nombresNumeros[n]) || "";
+}
+
+function esAdmin() {
+  return !!sesionNumero && CONFIG.admins.includes(sesionNumero);
+}
+
+function validarSesion() {
+  if (!usuarioTelefono) {
+    sesionNumero = null;
+    return;
+  }
+  const num = normalizarNumero(usuarioTelefono);
+  if (numerosEfectivos().includes(num)) {
+    sesionNumero = num;
+    mensajeAcceso("");
+  } else if (adminCargado) {
+    // Ya conocemos la lista y este número no está: fuera.
+    sesionNumero = null;
+    mensajeAcceso("Este número no está en la lista del equipo. Si debería estar, avísale a Mauricio.");
+    if (window.firebase && firebase.auth && firebase.auth().currentUser) {
+      firebase.auth().signOut();
+    }
+  }
+  // Si la lista aún no carga, esperamos sin rechazar.
+}
+
+// La primera vez que entra un admin, la lista de CONFIG se copia a la nube
+// para que el panel sea la fuente de verdad de ahí en adelante.
+function sembrarNumerosSiFalta() {
+  if (!Store.nube || numerosSembrados || !esAdmin()) return;
+  const enNube = Store.datos.admin && Store.datos.admin.numeros;
+  if (enNube && Object.keys(enNube).length) return;
+  numerosSembrados = true;
+  const mapa = {};
+  CONFIG.numerosPermitidos.forEach((n) => {
+    mapa[n.replace(/\D/g, "")] = {
+      nombre: (CONFIG.nombresNumeros && CONFIG.nombresNumeros[n]) || "",
+      numero: n,
+    };
+  });
+  Store.db.child("admin/numeros").set(mapa);
+}
+
+function mapaNumerosActual() {
+  const mapa = {};
+  numerosEfectivos().forEach((n) => {
+    mapa[n.replace(/\D/g, "")] = { nombre: nombreDeNumero(n), numero: n };
+  });
+  return mapa;
+}
+
+function guardarNumeros(mapa) {
+  if (Store.nube) {
+    Store.db.child("admin/numeros").set(mapa);
+  } else {
+    if (!Store.datos.admin) Store.datos.admin = {};
+    Store.datos.admin.numeros = mapa;
+    Store.guardar("admin");
+  }
+  repintarTodo();
+}
+
+function pintarPanel() {
+  if (!esAdmin()) return;
+  const panel = document.getElementById("panel");
+  if (!panel) return;
+
+  // Lista de números con botón para quitar.
+  const listaEl = document.getElementById("panel-numeros");
+  listaEl.innerHTML = "";
+  const numeros = numerosEfectivos().slice().sort((a, b) =>
+    nombreDeNumero(a).localeCompare(nombreDeNumero(b))
+  );
+  numeros.forEach((n) => {
+    const li = document.createElement("li");
+    const texto = document.createElement("span");
+    const nombre = nombreDeNumero(n);
+    texto.textContent = (nombre ? nombre + " — " : "") + n;
+    const btn = document.createElement("button");
+    btn.className = "mini-btn";
+    btn.textContent = "Quitar";
+    const soyYo = n === sesionNumero;
+    const esUltimoAdmin = CONFIG.admins.includes(n) &&
+      CONFIG.admins.filter((a) => numeros.includes(a)).length <= 1;
+    btn.disabled = soyYo || esUltimoAdmin;
+    btn.title = soyYo
+      ? "No puedes quitar tu propio número"
+      : esUltimoAdmin
+        ? "Debe quedar al menos un administrador"
+        : "";
+    btn.addEventListener("click", () => {
+      if (!confirm("¿Quitar " + (nombre || n) + " de la lista? Ya no podrá entrar a editar.")) return;
+      const mapa = mapaNumerosActual();
+      delete mapa[n.replace(/\D/g, "")];
+      guardarNumeros(mapa);
+    });
+    li.append(texto, btn);
+    listaEl.appendChild(li);
+  });
+
+  // Datos del evento: se rellenan si cambiaron y no se están editando.
+  const ev = datosEvento();
+  const rellenar = (id, valor) => {
+    const input = document.getElementById(id);
+    if (document.activeElement !== input && input.value !== valor) input.value = valor;
+  };
+  rellenar("panel-evento-fecha", ev.fechaTexto);
+  rellenar("panel-evento-hora", ev.hora);
+  rellenar("panel-evento-lugar", ev.lugar);
+  rellenar("panel-evento-direccion", ev.direccion);
+  rellenar("panel-evento-cooperacion", ev.cooperacion);
+
+  // Extras de "¿Qué hace falta?" con botón para quitar.
+  const extrasEl = document.getElementById("panel-llevar-extras");
+  extrasEl.innerHTML = "";
+  const extras = (Store.datos.admin && Store.datos.admin.llevarExtras) || {};
+  Object.entries(extras).forEach(([clave, e]) => {
+    const li = document.createElement("li");
+    const texto = document.createElement("span");
+    texto.textContent = (e && e.texto) || e;
+    const btn = document.createElement("button");
+    btn.className = "mini-btn";
+    btn.textContent = "Quitar";
+    btn.addEventListener("click", () => {
+      if (Store.nube) {
+        Store.db.child("admin/llevarExtras/" + clave).remove();
+      } else {
+        delete Store.datos.admin.llevarExtras[clave];
+        Store.guardar("admin");
+      }
+      repintarTodo();
+    });
+    li.append(texto, btn);
+    extrasEl.appendChild(li);
+  });
+
+  // Encuesta: votos y ronda actual.
+  const encuesta = Store.get("encuesta");
+  const total = Object.values(encuesta).reduce((a, b) => a + (b || 0), 0);
+  document.getElementById("panel-encuesta-info").textContent =
+    total + " votos en total (ronda " + rondaEncuesta() + "). Al reiniciar se borran los votos y todos pueden votar de nuevo.";
+}
+
+document.getElementById("panel-numero-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!esAdmin()) return;
+  const nombre = document.getElementById("panel-numero-nombre").value.trim();
+  const numero = normalizarNumero(document.getElementById("panel-numero-telefono").value);
+  const digitos = numero.replace(/\D/g, "");
+  if (digitos.length !== 12 || !digitos.startsWith("52")) {
+    alert("Ese número no es válido. Escríbelo con 10 dígitos, por ejemplo 664 123 4567.");
+    return;
+  }
+  const mapa = mapaNumerosActual();
+  const clave = numero.replace(/\D/g, "");
+  const yaEstaba = !!mapa[clave];
+  mapa[clave] = { nombre, numero };
+  guardarNumeros(mapa);
+  e.target.reset();
+  alert(yaEstaba ? "Número actualizado: " + (nombre || numero) : "Registrado: " + (nombre || numero) + ". Ya puede entrar con su número por SMS.");
+});
+
+document.getElementById("panel-evento-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!esAdmin()) return;
+  const datos = {
+    fechaTexto: document.getElementById("panel-evento-fecha").value.trim(),
+    hora: document.getElementById("panel-evento-hora").value.trim(),
+    lugar: document.getElementById("panel-evento-lugar").value.trim(),
+    direccion: document.getElementById("panel-evento-direccion").value.trim(),
+    cooperacion: document.getElementById("panel-evento-cooperacion").value.trim(),
+  };
+  if (Store.nube) {
+    Store.db.child("admin/evento").set(datos);
+  } else {
+    if (!Store.datos.admin) Store.datos.admin = {};
+    Store.datos.admin.evento = datos;
+    Store.guardar("admin");
+  }
+  repintarTodo();
+  alert("Datos del evento guardados. Ya se ven en la página de todos.");
+});
+
+document.getElementById("panel-llevar-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!esAdmin()) return;
+  const texto = document.getElementById("panel-llevar-texto").value.trim();
+  if (!texto) return;
+  if (!textoPermitido(texto)) return;
+  if (Store.nube) {
+    Store.db.child("admin/llevarExtras").push({ texto });
+  } else {
+    if (!Store.datos.admin) Store.datos.admin = {};
+    if (!Store.datos.admin.llevarExtras) Store.datos.admin.llevarExtras = {};
+    Store.datos.admin.llevarExtras["local-" + Date.now()] = { texto };
+    Store.guardar("admin");
+  }
+  e.target.reset();
+  repintarTodo();
+});
+
+document.getElementById("btn-reiniciar-encuesta").addEventListener("click", () => {
+  if (!esAdmin()) return;
+  if (!confirm("¿Borrar todos los votos de la encuesta? Todos podrán votar de nuevo.")) return;
+  const ronda = rondaEncuesta() + 1;
+  if (Store.nube) {
+    Store.db.child("encuesta").set({});
+    Store.db.child("admin/encuestaRonda").set(ronda);
+  } else {
+    Store.datos.encuesta = {};
+    Store.guardar("encuesta");
+    if (!Store.datos.admin) Store.datos.admin = {};
+    Store.datos.admin.encuestaRonda = ronda;
+    Store.guardar("admin");
+  }
+  repintarTodo();
+  alert("Encuesta reiniciada. Ya se puede votar de nuevo.");
+});
+
 // ---------------- Acceso con número de teléfono (SMS) ----------------
 // Solo los números del equipo pueden participar y modificar lo editable.
 // La verificación es por SMS con Firebase Phone Auth: el código llega al
@@ -1243,8 +1617,10 @@ function actualizarAcceso() {
     b.disabled = !autenticado;
   });
   document.querySelectorAll(".encuesta-btn").forEach((b) => {
-    b.disabled = !autenticado || !!localStorage.getItem(VOTO_KEY);
+    b.disabled = !autenticado || !!miVotoActual();
   });
+  // El panel de control solo lo ven los administradores.
+  document.getElementById("panel").style.display = esAdmin() ? "block" : "none";
 }
 
 function initAuth() {
@@ -1256,25 +1632,16 @@ function initAuth() {
   crearVerificador();
 
   firebase.auth().onAuthStateChanged((user) => {
-    if (user && user.phoneNumber) {
-      const num = normalizarNumero(user.phoneNumber);
-      if (CONFIG.numerosPermitidos.includes(num)) {
-        sesionNumero = num;
-        mensajeAcceso("");
-      } else {
-        sesionNumero = null;
-        mensajeAcceso("Este número no está en la lista del equipo. Si debería estar, avísale a Mauricio.");
-        firebase.auth().signOut();
-      }
-    } else {
-      sesionNumero = null;
-    }
+    usuarioTelefono = user && user.phoneNumber ? user.phoneNumber : null;
+    validarSesion();
     actualizarAcceso();
   });
 
   document.getElementById("btn-enviar-codigo").addEventListener("click", async () => {
     const numero = normalizarNumero(document.getElementById("acceso-telefono").value);
-    if (!CONFIG.numerosPermitidos.includes(numero)) {
+    // La lista puede venir de la nube (panel de control); si aún no carga,
+    // se deja pasar y validarSesion la revisa cuando llegue.
+    if (adminCargado && !numerosEfectivos().includes(numero)) {
       mensajeAcceso("Ese número no está en la lista del equipo.");
       return;
     }
@@ -1320,23 +1687,9 @@ function initAuth() {
   });
 }
 
-// ---------------- Compartir por WhatsApp ----------------
-const textoShare =
-  "¡Estás invitado al evento de convivencia de " +
-  CONFIG.empresa +
-  "! " +
-  CONFIG.fechaTexto +
-  ", " +
-  CONFIG.hora +
-  ", " +
-  CONFIG.lugar +
-  ". Confirma tu asistencia aquí: " +
-  location.href;
-document.getElementById("btn-whatsapp").href =
-  "https://wa.me/?text=" + encodeURIComponent(textoShare);
-
 // ---------------- Arranque ----------------
 function repintarTodo() {
+  pintarEvento();
   pintarConfirmados();
   pintarLlevar();
   pintarApuntados();
@@ -1344,6 +1697,9 @@ function repintarTodo() {
   pintarReto();
   pintarEncuesta();
   pintarPuntos();
+  validarSesion();
+  sembrarNumerosSiFalta();
+  pintarPanel();
   actualizarAcceso();
 }
 
