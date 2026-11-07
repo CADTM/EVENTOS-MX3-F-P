@@ -85,6 +85,17 @@ body {
 
 .btn-primary { background: #1f6fb2; color: var(--blanco); }
 .btn-primary:hover { background: #185a91; }
+.btn-secondary { background: var(--blanco); color: var(--terracota); border: 2px solid var(--terracota); }
+
+.convivir-botones { display: flex; gap: 0.6rem; flex-wrap: wrap; margin: 1rem 0; }
+
+.sugerencia {
+  background: var(--terracota-suave);
+  border-left: 4px solid var(--terracota);
+  border-radius: 0.5rem;
+  padding: 0.9rem 1rem;
+  margin: 0;
+}
 .btn-ghost { background: transparent; color: var(--blanco); border: 2px solid var(--blanco); }
 .btn-whatsapp { background: #25d366; color: #062e16; }
 
@@ -331,6 +342,16 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
       <p class="muted" id="ideas-vacia">Aún no hay ideas. ¡Sube la primera!</p>
     </section>
 
+    <section class="section" id="convivir">
+      <h2>Para convivir más</h2>
+      <p class="muted">La idea es que todos platiquen con alguien nuevo. Toca un botón y la página te sugiere una actividad o con quién convivir.</p>
+      <div class="convivir-botones">
+        <button id="btn-actividad" class="btn btn-primary" type="button">Sugerir una actividad</button>
+        <button id="btn-persona" class="btn btn-secondary" type="button">¿Con quién convivo hoy?</button>
+      </div>
+      <p id="sugerencia-texto" class="sugerencia">Toca un botón para ver una sugerencia.</p>
+    </section>
+
     <section class="section">
       <h2>Agenda</h2>
       <ol class="agenda" id="agenda"></ol>
@@ -376,6 +397,17 @@ const CONFIG = {
   agenda: [
     "Adornar el almacén",
     "Un rato de convivio",
+  ],
+  // Actividades para romper el hielo y que todos convivan más.
+  actividadesConvivencia: [
+    "Dos verdades y una mentira: cada quien dice tres cosas de sí, una es mentira, y los demás adivinan cuál.",
+    "Presenta a alguien que no conozcas: pregúntale su nombre, qué hace y algo que le guste.",
+    "Preguntas rápidas en parejas: ¿café o té? ¿playa o montaña? ¿madrugador o nocturno?",
+    "Adivina quién: describe a un compañero sin decir su nombre y que los demás adivinen quién es.",
+    "Foto por equipos: armen equipos de 3 y tómense la foto más creativa del almacén.",
+    "Anécdota del trabajo: cada quien cuenta algo chistoso que le haya pasado en la Fisher.",
+    "Cadena de cumplidos: dile algo bueno a la persona que tienes a tu lado.",
+    "Reto de nombres: apréndete el nombre de 3 compañeros que no conocías.",
   ],
   // Cosas que hacen falta: cada quien se apunta con una
   llevar: [
@@ -857,6 +889,40 @@ document.getElementById("ideas-form").addEventListener("submit", (e) => {
     img.src = lector.result;
   };
   lector.readAsDataURL(archivo);
+});
+
+// ---------------- Para convivir más ----------------
+// Sugerencias de actividades y de personas para romper el hielo.
+function sugerenciaAleatoria(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+document.getElementById("btn-actividad").addEventListener("click", () => {
+  document.getElementById("sugerencia-texto").textContent =
+    "Actividad: " + sugerenciaAleatoria(CONFIG.actividadesConvivencia);
+});
+
+document.getElementById("btn-persona").addEventListener("click", () => {
+  const confirmados = Store.get("rsvp")
+    .filter((c) => c.asiste === "si")
+    .map((c) => c.nombre);
+  const textoEl = document.getElementById("sugerencia-texto");
+  if (confirmados.length >= 2) {
+    const a = sugerenciaAleatoria(confirmados);
+    let b = sugerenciaAleatoria(confirmados);
+    while (b === a) b = sugerenciaAleatoria(confirmados);
+    textoEl.textContent =
+      "Que platiquen: " + censurar(a) + " y " + censurar(b) +
+      ". Preséntense y cuéntense algo que no sepan el uno del otro.";
+  } else if (confirmados.length === 1) {
+    textoEl.textContent =
+      "Platícale a " + censurar(confirmados[0]) +
+      ": pregúntale algo que no sepas de esa persona.";
+  } else {
+    textoEl.textContent =
+      "Aún no hay confirmados. Empieza con los organizadores: " +
+      CONFIG.organizadores.join(" o ") + ".";
+  }
 });
 
 // ---------------- Compartir por WhatsApp ----------------
