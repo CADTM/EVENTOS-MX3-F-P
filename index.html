@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Evento Navideño – La Fisher MX3</title>
-  <meta name="description" content="Página para organizar el evento navideño de La Fisher MX3: confirma tu asistencia, apúntate con algo para llevar y revisa la agenda de la noche." />
+  <title>Eventos de Convivencia – La Fisher MX3</title>
+  <meta name="description" content="Página de eventos de convivencia de La Fisher MX3: el evento más próximo es decoración y convivencia por motivos decembrinos. Confirma tu asistencia, apúntate con algo para llevar y sube tus ideas." />
   <style>
 :root {
-  --verde: #14532d;
-  --verde-claro: #dcfce7;
-  --terracota: #b91c1c;
-  --terracota-suave: #fee2e2;
-  --crema: #fffbeb;
+  --verde: #0f2a44;
+  --verde-claro: #dbe9f5;
+  --terracota: #1f6fb2;
+  --terracota-suave: #e3eef7;
+  --crema: #f4f7fa;
   --texto: #1c1917;
   --muted: #78716c;
   --borde: #e7e5e4;
@@ -29,7 +29,7 @@ body {
 }
 
 .hero {
-  background: linear-gradient(135deg, var(--verde), #166534 55%, var(--terracota));
+  background: linear-gradient(135deg, #0b1f33, #164a73 55%, #1f6fb2);
   color: var(--blanco);
   text-align: center;
   padding: 3.5rem 1.25rem 2.5rem;
@@ -83,8 +83,8 @@ body {
   font-size: 1rem;
 }
 
-.btn-primary { background: #b91c1c; color: var(--blanco); }
-.btn-primary:hover { background: #991b1b; }
+.btn-primary { background: #1f6fb2; color: var(--blanco); }
+.btn-primary:hover { background: #185a91; }
 .btn-ghost { background: transparent; color: var(--blanco); border: 2px solid var(--blanco); }
 .btn-whatsapp { background: #25d366; color: #062e16; }
 
@@ -204,8 +204,8 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
 <body>
   <header class="hero">
     <p class="hero-eyebrow" id="empresa">La Fisher MX3</p>
-    <h1 id="titulo">🎄 Evento Navideño</h1>
-    <p class="hero-sub">Una noche para convivir en equipo: antojitos, intercambio y buena compañía.</p>
+    <h1 id="titulo">Eventos de Convivencia</h1>
+    <p class="hero-sub">Porque también existimos.</p>
 
     <div class="countdown" aria-label="Cuenta regresiva">
       <div class="count-box"><span id="cd-dias">--</span><small>días</small></div>
@@ -221,30 +221,41 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
   </header>
 
   <main>
-    <p class="aviso" id="aviso-nube" style="display:none">💡 Modo local: lo que guardes solo se ve en tu celular. Para que todos vean las confirmaciones, los apuntados y las ideas con foto, activa el guardado compartido (Firebase, gratis) siguiendo el README.</p>
+    <p class="aviso" id="aviso-nube" style="display:none">Modo local: lo que guardes solo se ve en tu celular. Para que todos vean las confirmaciones, los apuntados y las ideas con foto, activa el guardado compartido (Firebase, gratis) siguiendo el README.</p>
 
     <section class="cards">
       <article class="card">
-        <h2>📅 Fecha</h2>
+        <h2>Fecha</h2>
         <p id="fecha-texto">Fecha por definir</p>
       </article>
       <article class="card">
-        <h2>🕕 Hora</h2>
-        <p id="hora-texto">6:00 PM</p>
+        <h2>Hora</h2>
+        <p id="hora-texto">Por definir</p>
       </article>
       <article class="card">
-        <h2>📍 Lugar</h2>
+        <h2>Lugar</h2>
         <p id="lugar-texto">Por confirmar</p>
         <p class="muted" id="direccion-texto"></p>
       </article>
       <article class="card">
-        <h2>💰 Cooperación</h2>
-        <p id="cooperacion-texto">$150 por persona</p>
+        <h2>Cooperación</h2>
+        <p id="cooperacion-texto">Por definir</p>
       </article>
     </section>
 
+    <section class="section" id="eventos">
+      <h2>Eventos de convivencia</h2>
+      <p class="muted">Aquí se organizan los convivios del equipo. El evento más próximo es el de decoración y convivencia por motivos decembrinos.</p>
+      <ul id="lista-eventos" class="lista"></ul>
+    </section>
+
+    <section class="section" id="organizadores">
+      <h2>Organizadores</h2>
+      <ul id="lista-organizadores" class="lista"></ul>
+    </section>
+
     <section id="confirmar" class="section">
-      <h2>✅ Confirma tu asistencia</h2>
+      <h2>Confirma tu asistencia</h2>
       <p class="muted">Llena el formulario y tu nombre aparecerá en la lista de confirmados.</p>
 
       <form id="rsvp-form" class="form">
@@ -260,10 +271,6 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
           </select>
         </label>
         <label>
-          Acompañantes
-          <input type="number" id="rsvp-acompanantes" min="0" max="10" value="0" />
-        </label>
-        <label>
           ¿Qué llevas? (opcional)
           <input type="text" id="rsvp-lleva" placeholder="Ej. Un postre, refrescos..." />
         </label>
@@ -271,7 +278,7 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
       </form>
 
       <div class="stats">
-        <p><strong id="total-si">0</strong> confirmados · <strong id="total-personas">0</strong> personas en total · <strong id="total-no">0</strong> no pueden</p>
+        <p><strong id="total-si">0</strong> confirmados · <strong id="total-no">0</strong> no pueden</p>
       </div>
 
       <ul id="lista-confirmados" class="lista"></ul>
@@ -279,7 +286,7 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
     </section>
 
     <section id="llevar" class="section">
-      <h2>🧺 ¿Qué hace falta?</h2>
+      <h2>¿Qué hace falta?</h2>
       <p class="muted">Apúntate con algo para que no se repita ni falte nada. Toca “Yo lo llevo” y escribe tu nombre, o anota algo libremente aquí abajo. Todo queda guardado.</p>
       <ul id="lista-llevar" class="lista"></ul>
 
@@ -301,8 +308,8 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
     </section>
 
     <section class="section" id="ideas">
-      <h2>💡 Ideas para el evento</h2>
-      <p class="muted">La fecha aún no se define. Sube tu idea: lugar, comida, actividad, música, lo que se te ocurra.</p>
+      <h2>Ideas para el evento</h2>
+      <p class="muted">La fecha aún no se define. Sube tu idea: lugar, comida, actividad, música, lo que se te ocurra. Todo se revisa: sin malas palabras ni fotos explícitas.</p>
 
       <form id="ideas-form" class="form">
         <label>
@@ -325,19 +332,19 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
     </section>
 
     <section class="section">
-      <h2>🗓️ Agenda del día</h2>
+      <h2>Agenda</h2>
       <ol class="agenda" id="agenda"></ol>
     </section>
 
     <section class="section">
-      <h2>📣 Comparte la invitación</h2>
+      <h2>Comparte la invitación</h2>
       <p class="muted">Pásales el enlace de esta página a tus colegas por WhatsApp.</p>
       <a class="btn btn-whatsapp" id="btn-whatsapp" href="#" target="_blank" rel="noopener">Compartir por WhatsApp</a>
     </section>
   </main>
 
   <footer>
-    <p>Hecho con ❤️ para el equipo · Edita los datos del evento en la sección CONFIG al inicio del script de esta misma página.</p>
+    <p>La Fisher MX3 — Eventos de convivencia</p>
   </footer>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -348,26 +355,31 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
 // ============================================================
 const CONFIG = {
   empresa: "La Fisher MX3",
-  titulo: "🎄 Evento Navideño",
-  subtitulo: "Una noche para convivir en equipo: antojitos, intercambio y buena compañía.",
+  titulo: "Eventos de Convivencia",
+  subtitulo: "Porque también existimos.",
   fechaISO: "", // fecha aún por definir; cuando se defina, ponla aquí
                 // en formato "2026-12-18T18:00:00-08:00" y la cuenta regresiva aparece sola
   fechaTexto: "Fecha por definir",
-  hora: "6:00 PM",
+  hora: "Por definir",
   lugar: "Por confirmar",
   direccion: "",
-  cooperacion: "$150 por persona",
+  cooperacion: "Por definir",
+  organizadores: ["Luis Alberto", "Roberto Elionali"],
+  // Eventos de convivencia del equipo; el primero de la lista es el más próximo.
+  eventos: [
+    {
+      nombre: "Decoración y convivencia – motivos decembrinos",
+      fecha: "Fecha por definir",
+      estado: "Próximo",
+    },
+  ],
   agenda: [
-    "6:00 PM – Bienvenida y ponche",
-    "6:30 PM – Convivio, antojitos y ponche",
-    "7:30 PM – Intercambio de regalos",
-    "8:30 PM – Rifa y juegos",
-    "9:00 PM – Karaoke y villancicos",
-    "10:00 PM – Brindis y foto del equipo",
+    "Adornar el almacén",
+    "Un rato de convivio",
   ],
   // Cosas que hacen falta: cada quien se apunta con una
   llevar: [
-    "Ponche navideño",
+    "Ponche",
     "Tamales",
     "Pavo / pierna",
     "Ensalada de manzana",
@@ -407,6 +419,114 @@ const CONFIG = {
     measurementId: "G-QZVC977QS6",
   },
 };
+
+// ============================================================
+//  FILTRO DE CONTENIDO: sin malas palabras ni fotos explícitas
+// ============================================================
+const MALAS_PALABRAS = [
+  "puto", "puta", "putos", "putas", "mierda", "cabrón", "cabron", "cabrones",
+  "chingar", "chingada", "chingado", "chingados", "chingadas", "chinga", "chingo",
+  "verga", "pendejo", "pendeja", "pendejos", "culero", "culera", "culeros",
+  "mamón", "mamon", "mamones", "pinche", "pinches", "joder", "coño", "carajo",
+  "pito", "pene", "vagina", "coger", "follar", "zorra", "perra", "ojete",
+  "nalgas", "tetas", "culito", "polla", "maricón", "maricon", "joto", "puñal",
+  "hijo de puta", "hija de puta", "hijueputa", "malparido",
+  "fuck", "shit", "bitch", "asshole", "dick", "pussy", "whore", "slut", "cunt",
+];
+
+function normalizarTexto(t) {
+  return (t || "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "");
+}
+
+function contieneMalasPalabras(texto) {
+  const n = normalizarTexto(texto);
+  const conEspacios = " " + n.replace(/[^a-z0-9]+/g, " ") + " ";
+  const compacto = n.replace(/[^a-z0-9]+/g, "");
+  return MALAS_PALABRAS.some((palabra) => {
+    const p = normalizarTexto(palabra).replace(/[^a-z0-9]+/g, "");
+    if (!p) return false;
+    return conEspacios.includes(" " + normalizarTexto(palabra) + " ") || compacto.includes(p);
+  });
+}
+
+function textoPermitido(...textos) {
+  if (textos.some((t) => contieneMalasPalabras(t))) {
+    alert("Ese texto tiene una palabra no permitida. Usa un lenguaje respetuoso, por favor.");
+    return false;
+  }
+  return true;
+}
+
+// Por si algún dato viejo ya guardado trae una mala palabra, se muestra censurado.
+function censurar(texto) {
+  return (texto || "")
+    .split(/(\s+)/)
+    .map((parte) => {
+      const n = normalizarTexto(parte).replace(/[^a-z0-9]/g, "");
+      const esMala = n && MALAS_PALABRAS.some(
+        (p) => normalizarTexto(p).replace(/[^a-z0-9]/g, "") === n
+      );
+      return esMala ? "****" : parte;
+    })
+    .join("");
+}
+
+// Revisión de fotos explícitas con un modelo en el navegador (nsfwjs).
+// Se carga solo cuando alguien sube una foto; sin internet no se puede
+// revisar y la foto se permite. Si el modelo detecta contenido explícito,
+// la foto se rechaza.
+let modeloNSFW = null;
+let cargandoNSFW = null;
+
+function cargarModeloNSFW() {
+  if (modeloNSFW) return Promise.resolve(modeloNSFW);
+  if (cargandoNSFW) return cargandoNSFW;
+  const cargarScript = (src) =>
+    new Promise((res, rej) => {
+      const s = document.createElement("script");
+      s.src = src;
+      s.onload = res;
+      s.onerror = rej;
+      document.head.appendChild(s);
+    });
+  cargandoNSFW = cargarScript(
+    "https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"
+  )
+    .then(() =>
+      cargarScript("https://cdn.jsdelivr.net/npm/nsfwjs@3.0.0/dist/nsfwjs.min.js")
+    )
+    .then(() => window.nsfwjs.load())
+    .then((m) => {
+      modeloNSFW = m;
+      return m;
+    })
+    .catch(() => null);
+  return cargandoNSFW;
+}
+
+async function fotoPermitida(canvas) {
+  const modelo = await Promise.race([
+    cargarModeloNSFW(),
+    new Promise((res) => setTimeout(() => res(null), 20000)),
+  ]);
+  if (!modelo) return true;
+  try {
+    const pred = await modelo.classify(canvas);
+    const mapa = {};
+    pred.forEach((p) => {
+      mapa[p.className] = p.probability;
+    });
+    if ((mapa.Porn || 0) > 0.5 || (mapa.Hentai || 0) > 0.5 || (mapa.Sexy || 0) > 0.85) {
+      return false;
+    }
+    return true;
+  } catch (e) {
+    return true;
+  }
+}
 
 // ============================================================
 //  GUARDADO DE DATOS
@@ -506,6 +626,32 @@ if (!CONFIG.fechaISO) {
   setInterval(actualizarCuenta, 1000);
 }
 
+// ---------------- Organizadores ----------------
+const orgEl = document.getElementById("lista-organizadores");
+CONFIG.organizadores.forEach((nombre) => {
+  const li = document.createElement("li");
+  const texto = document.createElement("span");
+  texto.textContent = nombre;
+  const badge = document.createElement("span");
+  badge.className = "badge";
+  badge.textContent = "Organizador";
+  li.append(texto, badge);
+  orgEl.appendChild(li);
+});
+
+// ---------------- Próximos eventos de convivencia ----------------
+const eventosEl = document.getElementById("lista-eventos");
+CONFIG.eventos.forEach((ev) => {
+  const li = document.createElement("li");
+  const texto = document.createElement("span");
+  texto.textContent = ev.nombre + " — " + ev.fecha;
+  const badge = document.createElement("span");
+  badge.className = "badge";
+  badge.textContent = ev.estado;
+  li.append(texto, badge);
+  eventosEl.appendChild(li);
+});
+
 // ---------------- Agenda ----------------
 const agendaEl = document.getElementById("agenda");
 CONFIG.agenda.forEach((item) => {
@@ -523,9 +669,7 @@ function pintarConfirmados() {
   listaEl.innerHTML = "";
   const si = confirmados.filter((c) => c.asiste === "si");
   const no = confirmados.filter((c) => c.asiste === "no");
-  const personas = si.reduce((t, c) => t + 1 + (c.acompanantes || 0), 0);
   document.getElementById("total-si").textContent = si.length;
-  document.getElementById("total-personas").textContent = personas;
   document.getElementById("total-no").textContent = no.length;
   vaciaEl.style.display = confirmados.length ? "none" : "block";
 
@@ -533,9 +677,7 @@ function pintarConfirmados() {
     const li = document.createElement("li");
     const texto = document.createElement("span");
     texto.textContent =
-      c.nombre +
-      (c.acompanantes ? ` (+${c.acompanantes})` : "") +
-      (c.lleva ? ` — lleva: ${c.lleva}` : "");
+      censurar(c.nombre) + (c.lleva ? ` — lleva: ${censurar(c.lleva)}` : "");
     const badge = document.createElement("span");
     badge.className = "badge" + (c.asiste === "no" ? " no" : "");
     badge.textContent = c.asiste === "si" ? "Confirmado" : "No asiste";
@@ -548,12 +690,13 @@ document.getElementById("rsvp-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const nombre = document.getElementById("rsvp-nombre").value.trim();
   if (!nombre) return;
+  const lleva = document.getElementById("rsvp-lleva").value.trim();
+  if (!textoPermitido(nombre, lleva)) return;
   const confirmados = Store.get("rsvp");
   const registro = {
     nombre,
     asiste: document.getElementById("rsvp-asiste").value,
-    acompanantes: parseInt(document.getElementById("rsvp-acompanantes").value, 10) || 0,
-    lleva: document.getElementById("rsvp-lleva").value.trim(),
+    lleva,
   };
   const i = confirmados.findIndex(
     (c) => c.nombre.toLowerCase() === nombre.toLowerCase()
@@ -563,8 +706,7 @@ document.getElementById("rsvp-form").addEventListener("submit", (e) => {
   Store.guardar("rsvp");
   pintarConfirmados();
   e.target.reset();
-  document.getElementById("rsvp-acompanantes").value = 0;
-  alert("¡Gracias, " + nombre + "! Tu confirmación quedó guardada. 🎄");
+  alert("¡Gracias, " + nombre + "! Tu confirmación quedó guardada.");
 });
 
 // ---------------- ¿Qué hace falta? ----------------
@@ -576,12 +718,12 @@ function pintarLlevar() {
   CONFIG.llevar.forEach((item) => {
     const li = document.createElement("li");
     const nombre = document.createElement("span");
-    nombre.textContent = "🎁 " + item;
+    nombre.textContent = item;
     const quien = llevarAsignado[item];
     if (quien) {
       const badge = document.createElement("span");
       badge.className = "badge";
-      badge.textContent = "Lo lleva: " + quien;
+      badge.textContent = "Lo lleva: " + censurar(quien);
       li.append(nombre, badge);
     } else {
       const btn = document.createElement("button");
@@ -590,6 +732,7 @@ function pintarLlevar() {
       btn.addEventListener("click", () => {
         const persona = prompt("¿Tu nombre?", "");
         if (persona && persona.trim()) {
+          if (!textoPermitido(persona.trim())) return;
           llevarAsignado[item] = persona.trim();
           Store.guardar("llevar");
           pintarLlevar();
@@ -612,10 +755,10 @@ function pintarApuntados() {
   apuntados.forEach((a) => {
     const li = document.createElement("li");
     const texto = document.createElement("span");
-    texto.textContent = "🧺 " + a.que;
+    texto.textContent = censurar(a.que);
     const badge = document.createElement("span");
     badge.className = "badge";
-    badge.textContent = "Lo lleva: " + a.nombre;
+    badge.textContent = "Lo lleva: " + censurar(a.nombre);
     li.append(texto, badge);
     listaApuntadosEl.appendChild(li);
   });
@@ -626,6 +769,7 @@ document.getElementById("llevar-form").addEventListener("submit", (e) => {
   const nombre = document.getElementById("llevar-nombre").value.trim();
   const que = document.getElementById("llevar-que").value.trim();
   if (!nombre || !que) return;
+  if (!textoPermitido(nombre, que)) return;
   const apuntados = Store.get("apuntados");
   apuntados.push({ nombre, que });
   Store.guardar("apuntados");
@@ -647,10 +791,10 @@ function pintarIdeas() {
     li.className = "idea-item";
     const cont = document.createElement("div");
     const texto = document.createElement("span");
-    texto.textContent = "💡 " + idea.texto;
+    texto.textContent = censurar(idea.texto);
     const badge = document.createElement("span");
     badge.className = "badge";
-    badge.textContent = idea.nombre;
+    badge.textContent = censurar(idea.nombre);
     cont.append(texto, badge);
     li.appendChild(cont);
     if (idea.foto) {
@@ -669,6 +813,7 @@ document.getElementById("ideas-form").addEventListener("submit", (e) => {
   const nombre = document.getElementById("idea-nombre").value.trim();
   const texto = document.getElementById("idea-texto").value.trim();
   if (!nombre || !texto) return;
+  if (!textoPermitido(nombre, texto)) return;
   const archivo = document.getElementById("idea-foto").files[0];
 
   const terminar = (foto) => {
@@ -683,7 +828,7 @@ document.getElementById("ideas-form").addEventListener("submit", (e) => {
     }
     pintarIdeas();
     e.target.reset();
-    alert("¡Gracias, " + nombre + "! Tu idea quedó publicada. 💡");
+    alert("¡Gracias, " + nombre + "! Tu idea quedó publicada.");
   };
 
   if (!archivo) {
@@ -694,13 +839,19 @@ document.getElementById("ideas-form").addEventListener("submit", (e) => {
   const lector = new FileReader();
   lector.onload = () => {
     const img = new Image();
-    img.onload = () => {
+    img.onload = async () => {
       const max = 800;
       const escala = Math.min(1, max / Math.max(img.width, img.height));
       const canvas = document.createElement("canvas");
       canvas.width = Math.round(img.width * escala);
       canvas.height = Math.round(img.height * escala);
       canvas.getContext("2d").drawImage(img, 0, 0, canvas.width, canvas.height);
+      // Filtro de fotos explícitas: si el modelo la marca como tal, no se sube.
+      const permitida = await fotoPermitida(canvas);
+      if (!permitida) {
+        alert("Esa foto no se puede subir al convivio, elige otra.");
+        return;
+      }
       terminar(canvas.toDataURL("image/jpeg", 0.75));
     };
     img.src = lector.result;
@@ -710,9 +861,7 @@ document.getElementById("ideas-form").addEventListener("submit", (e) => {
 
 // ---------------- Compartir por WhatsApp ----------------
 const textoShare =
-  "🎄 ¡Estás invitado al " +
-  CONFIG.titulo.replace("🎄 ", "") +
-  " de " +
+  "¡Estás invitado al evento de convivencia de " +
   CONFIG.empresa +
   "! " +
   CONFIG.fechaTexto +
