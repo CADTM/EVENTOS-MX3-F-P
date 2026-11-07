@@ -2015,9 +2015,63 @@ function actualizarAcceso() {
   if (!esAdmin() && tabActual === "panel") activarTab("evento");
 }
 
+// El botón Entrar, la salida y la entrada por contraseña no dependen de
+// Firebase: el panel de acceso siempre debe abrirse, aunque los scripts
+// de Firebase no hayan cargado. (Antes vivían dentro de initAuth y si
+// Firebase fallaba, el botón Entrar no hacía nada.)
+document.getElementById("btn-acceso-toggle").addEventListener("click", () => {
+  accesoAbierto = !accesoAbierto;
+  actualizarAcceso();
+});
+
+document.getElementById("btn-salir").addEventListener("click", () => {
+  sesionAdminClave = false;
+  guardarSesionClave(false);
+  if (window.firebase && firebase.auth) firebase.auth().signOut();
+  repintarTodo();
+});
+
+// Entrada de administrador por contraseña (sin SMS).
+document.getElementById("btn-entrar-clave").addEventListener("click", async () => {
+  const clave = document.getElementById("acceso-clave").value;
+  const msgEl = document.getElementById("acceso-clave-mensaje");
+  if (!clave) return;
+  if (Store.nube && !adminCargado) {
+    msgEl.textContent = "Cargando, espera un momento e inténtalo de nuevo.";
+    return;
+  }
+  msgEl.textContent = "Verificando...";
+  const hashGuardado = Store.datos.admin && Store.datos.admin.claveHash;
+  if (hashGuardado) {
+    const hash = await hashClave(clave);
+    if (!hash) {
+      msgEl.textContent = "La contraseña solo funciona desde la página publicada (https).";
+      return;
+    }
+    if (hash === hashGuardado) {
+      sesionAdminClave = true;
+      guardarSesionClave(true);
+      msgEl.textContent = "";
+      document.getElementById("acceso-clave").value = "";
+      repintarTodo();
+    } else {
+      msgEl.textContent = "Contraseña incorrecta.";
+    }
+  } else if (clave === CONFIG.claveInicial) {
+    sesionAdminClave = true;
+    guardarSesionClave(true);
+    msgEl.textContent = "";
+    document.getElementById("acceso-clave").value = "";
+    repintarTodo();
+    alert("Entraste con la contraseña temporal. Cámbiala ahora en el Panel de control, en Contraseña de administrador.");
+  } else {
+    msgEl.textContent = "Contraseña incorrecta. Si aún no hay una configurada, entra por SMS y configúrala en el panel.";
+  }
+});
+
 function initAuth() {
   if (!CONFIG.firebase || !window.firebase || !firebase.auth) {
-    mensajeAcceso("La verificación por SMS no está disponible en esta página.");
+    mensajeAcceso("No se pudo cargar el acceso por SMS. Revisa tu conexión y recarga la página.");
     actualizarAcceso();
     return;
   }
@@ -2074,55 +2128,6 @@ function initAuth() {
     }
   });
 
-  document.getElementById("btn-acceso-toggle").addEventListener("click", () => {
-    accesoAbierto = !accesoAbierto;
-    actualizarAcceso();
-  });
-
-  document.getElementById("btn-salir").addEventListener("click", () => {
-    sesionAdminClave = false;
-    guardarSesionClave(false);
-    firebase.auth().signOut();
-    repintarTodo();
-  });
-
-  // Entrada de administrador por contraseña (sin SMS).
-  document.getElementById("btn-entrar-clave").addEventListener("click", async () => {
-    const clave = document.getElementById("acceso-clave").value;
-    const msgEl = document.getElementById("acceso-clave-mensaje");
-    if (!clave) return;
-    if (Store.nube && !adminCargado) {
-      msgEl.textContent = "Cargando, espera un momento e inténtalo de nuevo.";
-      return;
-    }
-    msgEl.textContent = "Verificando...";
-    const hashGuardado = Store.datos.admin && Store.datos.admin.claveHash;
-    if (hashGuardado) {
-      const hash = await hashClave(clave);
-      if (!hash) {
-        msgEl.textContent = "La contraseña solo funciona desde la página publicada (https).";
-        return;
-      }
-      if (hash === hashGuardado) {
-        sesionAdminClave = true;
-        guardarSesionClave(true);
-        msgEl.textContent = "";
-        document.getElementById("acceso-clave").value = "";
-        repintarTodo();
-      } else {
-        msgEl.textContent = "Contraseña incorrecta.";
-      }
-    } else if (clave === CONFIG.claveInicial) {
-      sesionAdminClave = true;
-      guardarSesionClave(true);
-      msgEl.textContent = "";
-      document.getElementById("acceso-clave").value = "";
-      repintarTodo();
-      alert("Entraste con la contraseña temporal. Cámbiala ahora en el Panel de control, en Contraseña de administrador.");
-    } else {
-      msgEl.textContent = "Contraseña incorrecta. Si aún no hay una configurada, entra por SMS y configúrala en el panel.";
-    }
-  });
 }
 
 // ---------------- Pestañas ----------------
