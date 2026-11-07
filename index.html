@@ -28,6 +28,8 @@ body {
   margin: 0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   background: var(--crema);
+  background-image: radial-gradient(#dbe9f5 1px, transparent 1px);
+  background-size: 1.5rem 1.5rem;
   color: var(--texto);
   line-height: 1.5;
 }
@@ -86,6 +88,49 @@ body {
 .count-box small { text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.1em; }
 
 .hero-actions { display: flex; gap: 0.75rem; justify-content: center; flex-wrap: wrap; }
+
+.hero-stats { display: flex; gap: 0.6rem; justify-content: center; flex-wrap: wrap; margin-top: 1.25rem; }
+
+.hero-stat {
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 999px;
+  padding: 0.35rem 0.9rem;
+  font-size: 0.95rem;
+}
+
+.tabs {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  gap: 0.5rem;
+  background: rgba(244, 247, 250, 0.95);
+  padding: 0.75rem 0;
+  margin: 1rem 0 1.5rem;
+}
+
+.tab {
+  flex: 1;
+  padding: 0.7rem 0.5rem;
+  border-radius: 999px;
+  border: 2px solid var(--terracota);
+  background: var(--blanco);
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tab.activo { background: var(--terracota); color: var(--blanco); }
+
+.tab-panel { display: none; }
+.tab-panel.activo { display: block; animation: aparecer 0.25s ease; }
+
+@keyframes aparecer {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
 
 .btn {
   display: inline-block;
@@ -335,6 +380,12 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
       <a class="btn btn-primary" href="#confirmar">Confirmar asistencia</a>
       <a class="btn btn-ghost" href="#llevar">¿Qué llevo?</a>
     </div>
+
+    <div class="hero-stats" aria-label="Actividad del equipo">
+      <span class="hero-stat">✅ <strong id="stat-confirmados">0</strong> confirmados</span>
+      <span class="hero-stat">💡 <strong id="stat-ideas">0</strong> ideas</span>
+      <span class="hero-stat">🗳️ <strong id="stat-votos">0</strong> votos</span>
+    </div>
   </header>
 
   <div class="alegre-puntos" aria-hidden="true"></div>
@@ -372,233 +423,287 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
       </div>
     </section>
 
-    <section class="section panel" id="panel" style="display:none">
-      <h2>Panel de control</h2>
-      <p class="muted">Solo lo ven los administradores. Aquí se registra gente y se editan los datos del evento sin tener que pedirle nada a Fel.</p>
-
-      <h3>Registrar a alguien</h3>
-      <form id="panel-numero-form" class="form">
-        <label>
-          Nombre
-          <input type="text" id="panel-numero-nombre" placeholder="Ej. Rick Rocha" />
-        </label>
-        <label>
-          Número de WhatsApp
-          <input type="tel" id="panel-numero-telefono" placeholder="Ej. 664 123 4567" />
-        </label>
-        <button class="btn btn-primary" type="submit">Registrar número</button>
-      </form>
-      <ul id="panel-numeros" class="lista"></ul>
-
-      <h3>Datos del evento</h3>
-      <form id="panel-evento-form" class="form">
-        <label>
-          Fecha
-          <input type="text" id="panel-evento-fecha" />
-        </label>
-        <label>
-          Hora
-          <input type="text" id="panel-evento-hora" />
-        </label>
-        <label>
-          Lugar
-          <input type="text" id="panel-evento-lugar" />
-        </label>
-        <label>
-          Dirección
-          <input type="text" id="panel-evento-direccion" />
-        </label>
-        <label>
-          Cooperación
-          <input type="text" id="panel-evento-cooperacion" />
-        </label>
-        <button class="btn btn-primary" type="submit">Guardar datos del evento</button>
-      </form>
-
-      <h3>¿Qué hace falta?</h3>
-      <form id="panel-llevar-form" class="form">
-        <label>
-          Agregar algo a la lista
-          <input type="text" id="panel-llevar-texto" placeholder="Ej. Servilletas" />
-        </label>
-        <button class="btn btn-primary" type="submit">Agregar a la lista</button>
-      </form>
-      <ul id="panel-llevar-extras" class="lista"></ul>
-
-      <h3>Encuesta</h3>
-      <p class="muted" id="panel-encuesta-info"></p>
-      <button id="btn-reiniciar-encuesta" class="btn btn-secondary" type="button">Reiniciar encuesta (borrar votos)</button>
-
-      <h3>Contraseña de administrador</h3>
-      <p class="muted" id="panel-clave-info"></p>
-      <form id="panel-clave-form" class="form">
-        <label>
-          Nueva contraseña
-          <input type="password" id="panel-clave-nueva" placeholder="Mínimo 6 caracteres" />
-        </label>
-        <label>
-          Repite la contraseña
-          <input type="password" id="panel-clave-repite" placeholder="Repite la contraseña" />
-        </label>
-        <button class="btn btn-primary" type="submit">Guardar contraseña</button>
-      </form>
-    </section>
-
     <p class="aviso" id="aviso-nube" style="display:none">Modo local: lo que guardes solo se ve en tu celular. Para que todos vean las confirmaciones, los apuntados y las ideas con foto, activa el guardado compartido (Firebase, gratis) siguiendo el README.</p>
 
-    <section class="cards">
-      <article class="card">
-        <h2>Fecha</h2>
-        <p id="fecha-texto">Fecha por definir</p>
-      </article>
-      <article class="card">
-        <h2>Hora</h2>
-        <p id="hora-texto">Por definir</p>
-      </article>
-      <article class="card">
-        <h2>Lugar</h2>
-        <p id="lugar-texto">Por confirmar</p>
-        <p class="muted" id="direccion-texto"></p>
-      </article>
-      <article class="card">
-        <h2>Cooperación</h2>
-        <p id="cooperacion-texto">Por definir</p>
-      </article>
-    </section>
+    <nav class="tabs" aria-label="Secciones de la página">
+      <button class="tab activo" data-tab="evento" type="button">El evento</button>
+      <button class="tab" data-tab="participar" type="button">Participar</button>
+      <button class="tab" data-tab="diversion" type="button">Diversión</button>
+      <button class="tab" data-tab="panel" id="tab-btn-panel" type="button" style="display:none">Panel</button>
+    </nav>
 
-    <section class="section" id="eventos">
-      <h2>Eventos de convivencia</h2>
-      <p class="muted">Aquí se organizan los convivios del equipo. El evento más próximo es el de decoración y convivencia por motivos decembrinos.</p>
-      <ul id="lista-eventos" class="lista"></ul>
-    </section>
+    <div class="tab-panel activo" id="tab-evento">
+      <section class="cards">
+        <article class="card">
+          <h2>Fecha</h2>
+          <p id="fecha-texto">Fecha por definir</p>
+        </article>
+        <article class="card">
+          <h2>Hora</h2>
+          <p id="hora-texto">Por definir</p>
+        </article>
+        <article class="card">
+          <h2>Lugar</h2>
+          <p id="lugar-texto">Por confirmar</p>
+          <p class="muted" id="direccion-texto"></p>
+        </article>
+        <article class="card">
+          <h2>Cooperación</h2>
+          <p id="cooperacion-texto">Por definir</p>
+        </article>
+      </section>
 
-    <section class="section seccion-divertida" id="reto">
-      <h2>Reto de hoy 🎯</h2>
-      <p class="muted">Un reto distinto cada día, el mismo para todo el equipo. ¿Te animas?</p>
-      <p class="reto-texto" id="reto-texto"></p>
-      <button id="btn-otro-reto" class="btn btn-secondary" type="button">Otro reto</button>
-    </section>
+      <section class="section" id="eventos">
+        <h2>Eventos de convivencia</h2>
+        <p class="muted">Aquí se organizan los convivios del equipo. El evento más próximo es el de decoración y convivencia por motivos decembrinos.</p>
+        <ul id="lista-eventos" class="lista"></ul>
+      </section>
 
-    <section class="section seccion-divertida" id="encuesta">
-      <h2>Encuesta: ¿qué no puede faltar? 🗳️</h2>
-      <p class="muted">Vota y ve en vivo lo que quiere el equipo. Solo puedes votar una vez.</p>
-      <div id="encuesta-opciones" class="encuesta"></div>
-      <p class="muted" id="encuesta-total"></p>
-    </section>
+      <section class="section" id="organizadores">
+        <h2>Organizadores</h2>
+        <ul id="lista-organizadores" class="lista"></ul>
+      </section>
 
-    <section class="section seccion-divertida" id="puntos">
-      <h2>Tabla de puntos del equipo 🏆</h2>
-      <p class="muted">Confirmar vale 10 puntos, traer algo 10, apuntarse con algo 5 y subir una idea 5. El que más junte es el alma de la fiesta.</p>
-      <ol id="puntos-lista" class="puntos-lista"></ol>
-      <p class="muted" id="puntos-vacio" style="display:none">Nadie tiene puntos todavía. Sé el primero en confirmar.</p>
-    </section>
+      <section class="section">
+        <h2>Agenda</h2>
+        <ol class="agenda" id="agenda"></ol>
+      </section>
 
-    <section class="section" id="organizadores">
-      <h2>Organizadores</h2>
-      <ul id="lista-organizadores" class="lista"></ul>
-    </section>
+      <section class="section">
+        <h2>Comparte la invitación</h2>
+        <p class="muted">Pásales el enlace de esta página a tus colegas por WhatsApp.</p>
+        <a class="btn btn-whatsapp" id="btn-whatsapp" href="#" target="_blank" rel="noopener">Compartir por WhatsApp</a>
+      </section>
+    </div>
 
-    <section id="confirmar" class="section">
-      <h2>Confirma tu asistencia</h2>
-      <p class="muted">Llena el formulario y tu nombre aparecerá en la lista de confirmados.</p>
+    <div class="tab-panel" id="tab-participar">
+      <section id="confirmar" class="section">
+        <h2>Confirma tu asistencia</h2>
+        <p class="muted">Llena el formulario y tu nombre aparecerá en la lista de confirmados.</p>
 
-      <form id="rsvp-form" class="form">
-        <label>
-          Tu nombre
-          <input type="text" id="rsvp-nombre" required placeholder="Ej. Mauricio" />
-        </label>
-        <label>
-          ¿Asistes?
-          <select id="rsvp-asiste">
-            <option value="si">¡Sí, ahí nos vemos!</option>
-            <option value="no">No puedo esta vez</option>
-          </select>
-        </label>
-        <label>
-          ¿Qué llevas? (opcional)
-          <input type="text" id="rsvp-lleva" placeholder="Ej. Un postre, refrescos..." />
-        </label>
-        <button class="btn btn-primary" type="submit">Guardar mi confirmación</button>
-      </form>
+        <form id="rsvp-form" class="form">
+          <label>
+            Tu nombre
+            <input type="text" id="rsvp-nombre" required placeholder="Ej. Mauricio" />
+          </label>
+          <label>
+            ¿Asistes?
+            <select id="rsvp-asiste">
+              <option value="si">¡Sí, ahí nos vemos!</option>
+              <option value="no">No puedo esta vez</option>
+            </select>
+          </label>
+          <label>
+            ¿Qué llevas? (opcional)
+            <input type="text" id="rsvp-lleva" placeholder="Ej. Un postre, refrescos..." />
+          </label>
+          <button class="btn btn-primary" type="submit">Guardar mi confirmación</button>
+        </form>
 
-      <div class="stats">
-        <p><strong id="total-si">0</strong> confirmados · <strong id="total-no">0</strong> no pueden</p>
-      </div>
+        <div class="stats">
+          <p><strong id="total-si">0</strong> confirmados · <strong id="total-no">0</strong> no pueden</p>
+        </div>
 
-      <ul id="lista-confirmados" class="lista"></ul>
-      <p class="muted" id="lista-vacia">Aún no hay confirmados. ¡Sé el primero!</p>
-    </section>
+        <ul id="lista-confirmados" class="lista"></ul>
+        <p class="muted" id="lista-vacia">Aún no hay confirmados. ¡Sé el primero!</p>
+      </section>
 
-    <section id="llevar" class="section">
-      <h2>¿Qué hace falta?</h2>
-      <p class="muted">Apúntate con algo para que no se repita ni falte nada. Toca “Yo lo llevo” y escribe tu nombre, o anota algo libremente aquí abajo. Todo queda guardado.</p>
-      <ul id="lista-llevar" class="lista"></ul>
+      <section id="llevar" class="section">
+        <h2>¿Qué hace falta?</h2>
+        <p class="muted">Apúntate con algo para que no se repita ni falte nada. Toca “Yo lo llevo” y escribe tu nombre, o anota algo libremente aquí abajo. Todo queda guardado.</p>
+        <ul id="lista-llevar" class="lista"></ul>
 
-      <form id="llevar-form" class="form">
-        <label>
-          Tu nombre
-          <input type="text" id="llevar-nombre" required placeholder="Ej. Mauricio" />
-        </label>
-        <label>
-          ¿Qué llevas?
-          <input type="text" id="llevar-que" required placeholder="Ej. 2 kilos de carne asada" />
-        </label>
-        <button class="btn btn-primary" type="submit">Apuntarme con esto</button>
-      </form>
+        <form id="llevar-form" class="form">
+          <label>
+            Tu nombre
+            <input type="text" id="llevar-nombre" required placeholder="Ej. Mauricio" />
+          </label>
+          <label>
+            ¿Qué llevas?
+            <input type="text" id="llevar-que" required placeholder="Ej. 2 kilos de carne asada" />
+          </label>
+          <button class="btn btn-primary" type="submit">Apuntarme con esto</button>
+        </form>
 
-      <h3>Ya se apuntaron con algo</h3>
-      <ul id="lista-apuntados" class="lista"></ul>
-      <p class="muted" id="apuntados-vacio">Aún nadie se ha apuntado. ¡Sé el primero!</p>
-    </section>
+        <h3>Ya se apuntaron con algo</h3>
+        <ul id="lista-apuntados" class="lista"></ul>
+        <p class="muted" id="apuntados-vacio">Aún nadie se ha apuntado. ¡Sé el primero!</p>
+      </section>
 
-    <section class="section" id="ideas">
-      <h2>Ideas para el evento</h2>
-      <p class="muted">La fecha aún no se define. Sube tu idea: lugar, comida, actividad, música, lo que se te ocurra. Todo se revisa: sin malas palabras ni fotos explícitas.</p>
+      <section class="section" id="ideas">
+        <h2>Ideas para el evento</h2>
+        <p class="muted">La fecha aún no se define. Sube tu idea: lugar, comida, actividad, música, lo que se te ocurra. Todo se revisa: sin malas palabras ni fotos explícitas.</p>
 
-      <form id="ideas-form" class="form">
-        <label>
-          Tu nombre
-          <input type="text" id="idea-nombre" required placeholder="Ej. Mauricio" />
-        </label>
-        <label>
-          Tu idea
-          <textarea id="idea-texto" rows="3" required placeholder="Ej. Que sea en un salón con alberca y hagamos intercambio de regalos..."></textarea>
-        </label>
-        <label>
-          Foto de tu idea (opcional)
-          <input type="file" id="idea-foto" accept="image/*" />
-        </label>
-        <button class="btn btn-primary" type="submit">Subir mi idea</button>
-      </form>
+        <form id="ideas-form" class="form">
+          <label>
+            Tu nombre
+            <input type="text" id="idea-nombre" required placeholder="Ej. Mauricio" />
+          </label>
+          <label>
+            Tu idea
+            <textarea id="idea-texto" rows="3" required placeholder="Ej. Que sea en un salón con alberca y hagamos intercambio de regalos..."></textarea>
+          </label>
+          <label>
+            Foto de tu idea (opcional)
+            <input type="file" id="idea-foto" accept="image/*" />
+          </label>
+          <button class="btn btn-primary" type="submit">Subir mi idea</button>
+        </form>
 
-      <ul id="lista-ideas" class="lista"></ul>
-      <p class="muted" id="ideas-vacia">Aún no hay ideas. ¡Sube la primera!</p>
-    </section>
+        <ul id="lista-ideas" class="lista"></ul>
+        <p class="muted" id="ideas-vacia">Aún no hay ideas. ¡Sube la primera!</p>
+      </section>
+    </div>
 
-    <section class="section seccion-divertida" id="convivir">
-      <h2>Para convivir más 🎉</h2>
-      <p class="muted">La idea es que todos platiquen con alguien nuevo. Toca un botón y la página te sugiere una actividad o con quién convivir.</p>
-      <div class="convivir-botones">
-        <button id="btn-actividad" class="btn btn-primary" type="button">Sugerir una actividad</button>
-        <button id="btn-persona" class="btn btn-secondary" type="button">¿Con quién convivo hoy?</button>
-      </div>
-      <p id="sugerencia-texto" class="sugerencia">Toca un botón para ver una sugerencia.</p>
-    </section>
+    <div class="tab-panel" id="tab-diversion">
+      <section class="section seccion-divertida" id="reto">
+        <h2>Reto de hoy 🎯</h2>
+        <p class="muted">Un reto distinto cada día, el mismo para todo el equipo. ¿Te animas? Los retos los propone el equipo.</p>
+        <p class="reto-texto" id="reto-texto"></p>
+        <button id="btn-otro-reto" class="btn btn-secondary" type="button">Otro reto</button>
+        <form id="reto-form" class="form form-compacto">
+          <label>
+            Tu nombre
+            <input type="text" id="reto-nombre" placeholder="Ej. Mauricio" />
+          </label>
+          <label>
+            Propón un reto para el equipo
+            <input type="text" id="reto-texto-nuevo" placeholder="Ej. Trae tu foto más chistosa del trabajo" />
+          </label>
+          <button class="btn btn-primary" type="submit">Proponer reto</button>
+        </form>
+        <h3>Retos propuestos por el equipo</h3>
+        <ul id="lista-retos-propuestos" class="lista"></ul>
+        <p class="muted" id="retos-propuestos-vacio">Aún no hay retos propuestos. ¡Propón el primero!</p>
+      </section>
 
-    <section class="section">
-      <h2>Agenda</h2>
-      <ol class="agenda" id="agenda"></ol>
-    </section>
+      <section class="section seccion-divertida" id="encuesta">
+        <h2>Encuesta: ¿qué no puede faltar? 🗳️</h2>
+        <p class="muted">Vota y ve en vivo lo que quiere el equipo. Solo puedes votar una vez. Las opciones las propone el equipo.</p>
+        <div id="encuesta-opciones" class="encuesta"></div>
+        <p class="muted" id="encuesta-total"></p>
+        <form id="encuesta-opcion-form" class="form form-compacto">
+          <label>
+            Tu nombre
+            <input type="text" id="encuesta-opcion-nombre" placeholder="Ej. Mauricio" />
+          </label>
+          <label>
+            Propón una opción para la encuesta
+            <input type="text" id="encuesta-opcion-texto" placeholder="Ej. Karaoke" />
+          </label>
+          <button class="btn btn-primary" type="submit">Proponer opción</button>
+        </form>
+      </section>
 
-    <section class="section">
-      <h2>Comparte la invitación</h2>
-      <p class="muted">Pásales el enlace de esta página a tus colegas por WhatsApp.</p>
-      <a class="btn btn-whatsapp" id="btn-whatsapp" href="#" target="_blank" rel="noopener">Compartir por WhatsApp</a>
-    </section>
+      <section class="section seccion-divertida" id="puntos">
+        <h2>Tabla de puntos del equipo 🏆</h2>
+        <p class="muted">Confirmar vale 10 puntos, traer algo 10, apuntarse con algo 5 y subir una idea 5. El que más junte es el alma de la fiesta.</p>
+        <ol id="puntos-lista" class="puntos-lista"></ol>
+        <p class="muted" id="puntos-vacio" style="display:none">Nadie tiene puntos todavía. Sé el primero en confirmar.</p>
+      </section>
+
+      <section class="section seccion-divertida" id="convivir">
+        <h2>Para convivir más 🎉</h2>
+        <p class="muted">La idea es que todos platiquen con alguien nuevo. Toca un botón y la página te sugiere una actividad o con quién convivir. Las actividades las propone el equipo.</p>
+        <div class="convivir-botones">
+          <button id="btn-actividad" class="btn btn-primary" type="button">Sugerir una actividad</button>
+          <button id="btn-persona" class="btn btn-secondary" type="button">¿Con quién convivo hoy?</button>
+        </div>
+        <p id="sugerencia-texto" class="sugerencia">Toca un botón para ver una sugerencia.</p>
+        <form id="actividad-form" class="form form-compacto">
+          <label>
+            Tu nombre
+            <input type="text" id="actividad-nombre" placeholder="Ej. Mauricio" />
+          </label>
+          <label>
+            Propón una actividad para convivir
+            <input type="text" id="actividad-texto" placeholder="Ej. Concurso de chistes en parejas" />
+          </label>
+          <button class="btn btn-primary" type="submit">Proponer actividad</button>
+        </form>
+        <h3>Actividades propuestas por el equipo</h3>
+        <ul id="lista-actividades-propuestas" class="lista"></ul>
+        <p class="muted" id="actividades-propuestas-vacio">Aún no hay actividades propuestas. ¡Propón la primera!</p>
+      </section>
+    </div>
+
+    <div class="tab-panel" id="tab-panel">
+      <section class="section panel" id="panel">
+        <h2>Panel de control</h2>
+        <p class="muted">Solo lo ven los administradores. Aquí se registra gente y se editan los datos del evento sin tener que pedirle nada a Fel.</p>
+
+        <h3>Registrar a alguien</h3>
+        <form id="panel-numero-form" class="form">
+          <label>
+            Nombre
+            <input type="text" id="panel-numero-nombre" placeholder="Ej. Rick Rocha" />
+          </label>
+          <label>
+            Número de WhatsApp
+            <input type="tel" id="panel-numero-telefono" placeholder="Ej. 664 123 4567" />
+          </label>
+          <button class="btn btn-primary" type="submit">Registrar número</button>
+        </form>
+        <ul id="panel-numeros" class="lista"></ul>
+
+        <h3>Datos del evento</h3>
+        <form id="panel-evento-form" class="form">
+          <label>
+            Fecha
+            <input type="text" id="panel-evento-fecha" />
+          </label>
+          <label>
+            Hora
+            <input type="text" id="panel-evento-hora" />
+          </label>
+          <label>
+            Lugar
+            <input type="text" id="panel-evento-lugar" />
+          </label>
+          <label>
+            Dirección
+            <input type="text" id="panel-evento-direccion" />
+          </label>
+          <label>
+            Cooperación
+            <input type="text" id="panel-evento-cooperacion" />
+          </label>
+          <button class="btn btn-primary" type="submit">Guardar datos del evento</button>
+        </form>
+
+        <h3>¿Qué hace falta?</h3>
+        <form id="panel-llevar-form" class="form">
+          <label>
+            Agregar algo a la lista
+            <input type="text" id="panel-llevar-texto" placeholder="Ej. Servilletas" />
+          </label>
+          <button class="btn btn-primary" type="submit">Agregar a la lista</button>
+        </form>
+        <ul id="panel-llevar-extras" class="lista"></ul>
+
+        <h3>Encuesta</h3>
+        <p class="muted" id="panel-encuesta-info"></p>
+        <button id="btn-reiniciar-encuesta" class="btn btn-secondary" type="button">Reiniciar encuesta (borrar votos)</button>
+
+        <h3>Contraseña de administrador</h3>
+        <p class="muted" id="panel-clave-info"></p>
+        <form id="panel-clave-form" class="form">
+          <label>
+            Nueva contraseña
+            <input type="password" id="panel-clave-nueva" placeholder="Mínimo 6 caracteres" />
+          </label>
+          <label>
+            Repite la contraseña
+            <input type="password" id="panel-clave-repite" placeholder="Repite la contraseña" />
+          </label>
+          <button class="btn btn-primary" type="submit">Guardar contraseña</button>
+        </form>
+      </section>
+    </div>
   </main>
 
   <footer>
-    <p>La Fisher MX3 — Eventos de convivencia</p>
+    <p>La Fisher MX3 — Eventos de convivencia · Hecho por el equipo 💙</p>
   </footer>
 
   <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
@@ -857,11 +962,11 @@ async function fotoPermitida(canvas) {
 //  todos ven lo mismo en tiempo real. Si no, se guarda en el
 //  navegador de cada persona (modo local).
 // ============================================================
-const COLECCIONES = ["rsvp", "apuntados", "llevar", "ideas", "encuesta", "admin"];
+const COLECCIONES = ["rsvp", "apuntados", "llevar", "ideas", "encuesta", "admin", "actividades", "retos", "encuestaOpciones"];
 const LS_PREFIX = "fisher-navidad-";
 
 const Store = {
-  datos: { rsvp: [], apuntados: [], llevar: {}, ideas: [], encuesta: {}, admin: {} },
+  datos: { rsvp: [], apuntados: [], llevar: {}, ideas: [], encuesta: {}, admin: {}, actividades: {}, retos: {}, encuestaOpciones: {} },
   nube: false,
   db: null,
 
@@ -875,7 +980,7 @@ const Store = {
         this.db.on("value", (snap) => {
           const v = snap.val() || {};
           COLECCIONES.forEach((c) => {
-            this.datos[c] = v[c] || (c === "llevar" || c === "encuesta" || c === "admin" ? {} : []);
+            this.datos[c] = v[c] || (c === "llevar" || c === "encuesta" || c === "admin" || c === "actividades" || c === "retos" || c === "encuestaOpciones" ? {} : []);
           });
           adminCargado = true;
           repintarTodo();
@@ -1056,7 +1161,7 @@ function pintarConfirmados() {
 
 document.getElementById("rsvp-form").addEventListener("submit", (e) => {
   e.preventDefault();
-  if (!sesionNumero) {
+  if (!puedeEditar()) {
     alert("Primero verifica tu número en la sección Acceso del equipo.");
     return;
   }
@@ -1110,7 +1215,7 @@ function pintarLlevar() {
       btn.className = "mini-btn";
       btn.textContent = "Yo lo llevo";
       btn.addEventListener("click", () => {
-        if (!sesionNumero) {
+        if (!puedeEditar()) {
           alert("Primero verifica tu número en la sección Acceso del equipo.");
           return;
         }
@@ -1151,7 +1256,7 @@ function pintarApuntados() {
 
 document.getElementById("llevar-form").addEventListener("submit", (e) => {
   e.preventDefault();
-  if (!sesionNumero) {
+  if (!puedeEditar()) {
     alert("Primero verifica tu número en la sección Acceso del equipo.");
     return;
   }
@@ -1200,7 +1305,7 @@ function pintarIdeas() {
 
 document.getElementById("ideas-form").addEventListener("submit", (e) => {
   e.preventDefault();
-  if (!sesionNumero) {
+  if (!puedeEditar()) {
     alert("Primero verifica tu número en la sección Acceso del equipo.");
     return;
   }
@@ -1262,7 +1367,7 @@ function sugerenciaAleatoria(arr) {
 
 document.getElementById("btn-actividad").addEventListener("click", () => {
   document.getElementById("sugerencia-texto").textContent =
-    "Actividad: " + sugerenciaAleatoria(CONFIG.actividadesConvivencia);
+    "Actividad: " + sugerenciaAleatoria(actividadesTodas());
 });
 
 document.getElementById("btn-persona").addEventListener("click", () => {
@@ -1295,9 +1400,30 @@ function celebrar() {
   }
 }
 
+// Las propuestas las hace el equipo: las actividades, los retos y las
+// opciones de la encuesta se juntan con las de CONFIG.
+function actividadesTodas() {
+  const propuestas = Object.values(Store.get("actividades") || {}).map((a) => (a && a.texto) || a);
+  return CONFIG.actividadesConvivencia.concat(propuestas.filter(Boolean));
+}
+
+function retosTodos() {
+  const propuestos = Object.values(Store.get("retos") || {}).map((r) => (r && r.texto) || r);
+  return CONFIG.retos.concat(propuestos.filter(Boolean));
+}
+
+function opcionesEncuestaTodas() {
+  const propuestas = Object.entries(Store.get("encuestaOpciones") || {}).map(([id, o]) => ({
+    id,
+    texto: (o && o.texto) || o,
+  }));
+  return CONFIG.encuestaOpciones.concat(propuestas.filter((o) => o.texto));
+}
+
 // Reto de hoy: el mismo para todos según el día del mes.
 function retoDeHoy() {
-  return CONFIG.retos[new Date().getDate() % CONFIG.retos.length];
+  const todos = retosTodos();
+  return todos[new Date().getDate() % todos.length];
 }
 
 function pintarReto() {
@@ -1306,11 +1432,98 @@ function pintarReto() {
 }
 
 document.getElementById("btn-otro-reto").addEventListener("click", () => {
-  let reto = sugerenciaAleatoria(CONFIG.retos);
+  let reto = sugerenciaAleatoria(retosTodos());
   while (reto === document.getElementById("reto-texto").textContent) {
-    reto = sugerenciaAleatoria(CONFIG.retos);
+    reto = sugerenciaAleatoria(retosTodos());
   }
   document.getElementById("reto-texto").textContent = reto;
+});
+
+function pintarPropuestas(listaEl, vacioEl, propuestas) {
+  listaEl.innerHTML = "";
+  vacioEl.style.display = propuestas.length ? "none" : "block";
+  propuestas.forEach((p) => {
+    const li = document.createElement("li");
+    const texto = document.createElement("span");
+    texto.textContent = censurar((p && p.texto) || p);
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = censurar((p && p.nombre) || "Equipo");
+    li.append(texto, badge);
+    listaEl.appendChild(li);
+  });
+}
+
+function pintarActividadesPropuestas() {
+  pintarPropuestas(
+    document.getElementById("lista-actividades-propuestas"),
+    document.getElementById("actividades-propuestas-vacio"),
+    Object.values(Store.get("actividades") || {})
+  );
+}
+
+function pintarRetosPropuestos() {
+  pintarPropuestas(
+    document.getElementById("lista-retos-propuestos"),
+    document.getElementById("retos-propuestos-vacio"),
+    Object.values(Store.get("retos") || {})
+  );
+}
+
+function guardarPropuesta(coleccion, obj) {
+  if (Store.nube) {
+    Store.db.child(coleccion).push(obj);
+  } else {
+    if (!Store.datos[coleccion]) Store.datos[coleccion] = {};
+    Store.datos[coleccion]["local-" + Date.now()] = obj;
+    Store.guardar(coleccion);
+  }
+  repintarTodo();
+}
+
+document.getElementById("actividad-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!puedeEditar()) {
+    alert("Primero verifica tu número en la sección Acceso del equipo.");
+    return;
+  }
+  const nombre = document.getElementById("actividad-nombre").value.trim();
+  const texto = document.getElementById("actividad-texto").value.trim();
+  if (!texto) return;
+  if (!textoPermitido(nombre, texto)) return;
+  guardarPropuesta("actividades", { nombre, texto });
+  e.target.reset();
+  alert("¡Gracias! Tu actividad quedó propuesta y ya puede salir en las sugerencias.");
+});
+
+document.getElementById("reto-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!puedeEditar()) {
+    alert("Primero verifica tu número en la sección Acceso del equipo.");
+    return;
+  }
+  const nombre = document.getElementById("reto-nombre").value.trim();
+  const texto = document.getElementById("reto-texto-nuevo").value.trim();
+  if (!texto) return;
+  if (!textoPermitido(nombre, texto)) return;
+  guardarPropuesta("retos", { nombre, texto });
+  e.target.reset();
+  alert("¡Gracias! Tu reto quedó propuesto y ya puede salir como reto de hoy.");
+});
+
+document.getElementById("encuesta-opcion-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!puedeEditar()) {
+    alert("Primero verifica tu número en la sección Acceso del equipo.");
+    return;
+  }
+  const nombre = document.getElementById("encuesta-opcion-nombre").value.trim();
+  const texto = document.getElementById("encuesta-opcion-texto").value.trim();
+  if (!texto) return;
+  if (!textoPermitido(nombre, texto)) return;
+  guardarPropuesta("encuestaOpciones", { nombre, texto });
+  e.target.reset();
+  alert("¡Gracias! Tu opción ya aparece en la encuesta y se puede votar.");
 });
 
 // Encuesta en vivo: un voto por persona, resultados para todos al instante.
@@ -1333,12 +1546,13 @@ function pintarEncuesta() {
   const cont = document.getElementById("encuesta-opciones");
   const encuesta = Store.get("encuesta");
   const miVoto = miVotoActual();
-  const total = CONFIG.encuestaOpciones.reduce(
+  const opciones = opcionesEncuestaTodas();
+  const total = opciones.reduce(
     (acc, o) => acc + (encuesta[o.id] || 0),
     0
   );
   cont.innerHTML = "";
-  CONFIG.encuestaOpciones.forEach((opcion) => {
+  opciones.forEach((opcion) => {
     const votos = encuesta[opcion.id] || 0;
     const pct = total ? Math.round((votos / total) * 100) : 0;
     const fila = document.createElement("div");
@@ -1350,7 +1564,7 @@ function pintarEncuesta() {
     btn.textContent =
       opcion.texto + " — " + votos + " votos" + (miVoto === opcion.id ? " (tu voto)" : "");
     btn.addEventListener("click", () => {
-      if (!sesionNumero) {
+      if (!puedeEditar()) {
         alert("Primero verifica tu número en la sección Acceso del equipo.");
         return;
       }
@@ -1445,6 +1659,12 @@ function nombreDeNumero(n) {
 
 function esAdmin() {
   return sesionAdminClave || (!!sesionNumero && CONFIG.admins.includes(sesionNumero));
+}
+
+// Puede participar y modificar lo editable: con número verificado por SMS
+// o con la sesión de administrador por contraseña.
+function puedeEditar() {
+  return !!sesionNumero || sesionAdminClave;
 }
 
 // Contraseña de administrador: se guarda solo su hash en la nube.
@@ -1778,7 +1998,7 @@ function actualizarAcceso() {
     panel.style.display = accesoAbierto ? "block" : "none";
   }
   // Lo editable solo se puede usar con sesión verificada.
-  ["rsvp-form", "llevar-form", "ideas-form"].forEach((id) => {
+  ["rsvp-form", "llevar-form", "ideas-form", "reto-form", "encuesta-opcion-form", "actividad-form"].forEach((id) => {
     document.getElementById(id).querySelectorAll("input, select, textarea, button").forEach((el) => {
       el.disabled = !autenticado;
     });
@@ -1789,8 +2009,10 @@ function actualizarAcceso() {
   document.querySelectorAll(".encuesta-btn").forEach((b) => {
     b.disabled = !autenticado || !!miVotoActual();
   });
-  // El panel de control solo lo ven los administradores.
-  document.getElementById("panel").style.display = esAdmin() ? "block" : "none";
+  // La pestaña del panel de control solo la ven los administradores.
+  const btnPanel = document.getElementById("tab-btn-panel");
+  btnPanel.style.display = esAdmin() ? "" : "none";
+  if (!esAdmin() && tabActual === "panel") activarTab("evento");
 }
 
 function initAuth() {
@@ -1903,9 +2125,54 @@ function initAuth() {
   });
 }
 
+// ---------------- Pestañas ----------------
+// La página se divide en tres pestañas para que nada se amontone.
+let tabActual = "evento";
+
+function activarTab(nombre) {
+  tabActual = nombre;
+  document.querySelectorAll(".tab").forEach((b) => {
+    b.classList.toggle("activo", b.dataset.tab === nombre);
+  });
+  document.querySelectorAll(".tab-panel").forEach((p) => {
+    p.classList.toggle("activo", p.id === "tab-" + nombre);
+  });
+}
+
+document.querySelectorAll(".tab").forEach((b) => {
+  b.addEventListener("click", () => activarTab(b.dataset.tab));
+});
+
+// Los botones del encabezado llevan a la pestaña Participar.
+document.querySelectorAll(".hero-actions a").forEach((a) => {
+  a.addEventListener("click", () => activarTab("participar"));
+});
+
+// Si el enlace trae #confirmar, #llevar o #ideas, abre esa pestaña.
+(function () {
+  const hash = location.hash.replace("#", "");
+  const enParticipar = ["confirmar", "llevar", "ideas"];
+  const enEvento = ["eventos", "organizadores", "agenda"];
+  const enDiversion = ["reto", "encuesta", "puntos", "convivir"];
+  if (enParticipar.includes(hash)) activarTab("participar");
+  else if (enDiversion.includes(hash)) activarTab("diversion");
+  else if (enEvento.includes(hash)) activarTab("evento");
+})();
+
+// Estadísticas en vivo en el encabezado.
+function pintarHeroStats() {
+  const confirmados = Store.get("rsvp").filter((c) => c.asiste === "si").length;
+  const ideas = Store.get("ideas").length;
+  const votos = Object.values(Store.get("encuesta") || {}).reduce((a, b) => a + (b || 0), 0);
+  document.getElementById("stat-confirmados").textContent = confirmados;
+  document.getElementById("stat-ideas").textContent = ideas;
+  document.getElementById("stat-votos").textContent = votos;
+}
+
 // ---------------- Arranque ----------------
 function repintarTodo() {
   pintarEvento();
+  pintarHeroStats();
   pintarConfirmados();
   pintarLlevar();
   pintarApuntados();
@@ -1913,6 +2180,8 @@ function repintarTodo() {
   pintarReto();
   pintarEncuesta();
   pintarPuntos();
+  pintarActividadesPropuestas();
+  pintarRetosPropuestos();
   validarSesion();
   sembrarNumerosSiFalta();
   pintarPanel();
