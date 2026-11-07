@@ -16,6 +16,10 @@
   --muted: #78716c;
   --borde: #e7e5e4;
   --blanco: #ffffff;
+  --alegre: #f59e0b;
+  --alegre-suave: #fef3c7;
+  --teal: #0ea5a5;
+  --coral: #f97316;
 }
 
 * { box-sizing: border-box; }
@@ -33,6 +37,17 @@ body {
   color: var(--blanco);
   text-align: center;
   padding: 3.5rem 1.25rem 2.5rem;
+  border-bottom: 4px solid var(--alegre);
+}
+
+.alegre-puntos {
+  height: 0.75rem;
+  background-image:
+    radial-gradient(circle at 0.5rem 50%, var(--alegre) 0.35rem, transparent 0.36rem),
+    radial-gradient(circle at 1.5rem 50%, var(--terracota) 0.35rem, transparent 0.36rem),
+    radial-gradient(circle at 2.5rem 50%, var(--teal) 0.35rem, transparent 0.36rem);
+  background-size: 3rem 100%;
+  background-repeat: repeat-x;
 }
 
 .hero-eyebrow {
@@ -81,7 +96,13 @@ body {
   border: none;
   cursor: pointer;
   font-size: 1rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+  box-shadow: 0 2px 6px rgba(15, 42, 68, 0.15);
 }
+
+.btn:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(15, 42, 68, 0.2); }
+.btn:disabled { transform: none; box-shadow: none; opacity: 0.6; }
+.btn-chico { padding: 0.45rem 1rem; font-size: 0.9rem; }
 
 .btn-primary { background: #1f6fb2; color: var(--blanco); }
 .btn-primary:hover { background: #185a91; }
@@ -101,8 +122,8 @@ body {
 .reto-texto {
   font-size: 1.15rem;
   font-weight: 600;
-  background: var(--terracota-suave);
-  border-left: 4px solid var(--terracota);
+  background: var(--alegre-suave);
+  border-left: 4px solid var(--alegre);
   border-radius: 0.5rem;
   padding: 0.9rem 1rem;
 }
@@ -129,11 +150,14 @@ body {
 .encuesta-btn:disabled { cursor: default; opacity: 0.85; }
 
 .encuesta-pista { background: #e4ecf3; border-radius: 0.5rem; overflow: hidden; }
-.encuesta-barra { height: 0.5rem; background: var(--terracota); }
+.encuesta-barra { height: 0.5rem; background: linear-gradient(90deg, var(--terracota), var(--teal)); }
 
 .puntos-lista { padding-left: 1.25rem; display: grid; gap: 0.5rem; margin-top: 1rem; }
 .puntos-lista li { font-weight: 600; display: flex; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .puntos-titulo { font-weight: 400; color: var(--muted); }
+.puntos-1 { color: #b45309; }
+.puntos-2 { color: #64748b; }
+.puntos-3 { color: #92400e; }
 
 .sugerencia {
   background: var(--terracota-suave);
@@ -146,6 +170,20 @@ body {
 .btn-whatsapp { background: #25d366; color: #062e16; }
 
 main { max-width: 56rem; margin: 0 auto; padding: 0 1.25rem 2rem; }
+
+.acceso-barra {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  margin: 1.25rem 0 0;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.acceso-barra-fila { display: flex; align-items: center; gap: 0.75rem; }
+.acceso-barra-texto { font-weight: 700; flex: 1; }
+.acceso-panel { margin-top: 0.75rem; }
+.form-compacto { margin-top: 0; }
 
 .aviso {
   background: #fef3c7;
@@ -176,6 +214,28 @@ main { max-width: 56rem; margin: 0 auto; padding: 0 1.25rem 2rem; }
 
 .section { margin-bottom: 2.5rem; }
 .section h2 { margin-bottom: 0.25rem; }
+.section h2::after {
+  content: "";
+  display: block;
+  width: 3rem;
+  height: 0.25rem;
+  background: var(--alegre);
+  border-radius: 0.25rem;
+  margin-top: 0.3rem;
+}
+
+.seccion-divertida {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 1rem;
+  padding: 1.25rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+#reto { border-top: 4px solid var(--alegre); }
+#encuesta { border-top: 4px solid var(--terracota); }
+#puntos { border-top: 4px solid var(--teal); }
+#convivir { border-top: 4px solid var(--coral); }
 .muted { color: var(--muted); }
 
 .form {
@@ -277,34 +337,38 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
     </div>
   </header>
 
+  <div class="alegre-puntos" aria-hidden="true"></div>
+
   <main>
-    <section class="section" id="acceso">
-      <h2>Acceso del equipo</h2>
-      <p class="muted">Solo los números del equipo pueden confirmar, apuntarse y subir ideas. Verifícate con tu número por SMS. Sin sesión, la página solo se puede ver.</p>
-      <div id="acceso-no" class="form">
-        <label>
-          Tu número de WhatsApp
-          <input type="tel" id="acceso-telefono" placeholder="Ej. 664 731 8119" autocomplete="tel" />
-        </label>
-        <div id="recaptcha-container"></div>
-        <button id="btn-enviar-codigo" class="btn btn-primary" type="button">Enviarme el código por SMS</button>
-        <label id="acceso-codigo-label" style="display:none">
-          Código que te llegó por SMS
-          <input type="text" id="acceso-codigo" inputmode="numeric" placeholder="123456" />
-        </label>
-        <button id="btn-confirmar-codigo" class="btn btn-primary" type="button" style="display:none">Confirmar código</button>
-        <p id="acceso-mensaje" class="muted"></p>
-        <p class="muted">¿Eres administrador? También puedes entrar con contraseña, sin SMS.</p>
-        <label>
-          Contraseña de administrador
-          <input type="password" id="acceso-clave" placeholder="Contraseña" autocomplete="current-password" />
-        </label>
-        <button id="btn-entrar-clave" class="btn btn-secondary" type="button">Entrar como administrador</button>
-        <p id="acceso-clave-mensaje" class="muted"></p>
+    <section class="acceso-barra" id="acceso">
+      <div class="acceso-barra-fila">
+        <span class="acceso-barra-texto" id="acceso-estado">Acceso del equipo</span>
+        <button id="btn-acceso-toggle" class="btn btn-primary btn-chico" type="button">Entrar</button>
+        <button id="btn-salir" class="btn btn-secondary btn-chico" type="button" style="display:none">Salir</button>
       </div>
-      <div id="acceso-si" class="form" style="display:none">
-        <p>Sesión iniciada como <strong id="acceso-numero"></strong>. Ya puedes confirmar, apuntarte y subir ideas.</p>
-        <button id="btn-salir" class="btn btn-secondary" type="button">Salir</button>
+      <div id="acceso-panel" class="acceso-panel" style="display:none">
+        <div class="form form-compacto">
+          <p class="muted">Solo los números del equipo pueden participar. Entra con tu número por SMS o con la contraseña de administrador.</p>
+          <label>
+            Tu número de WhatsApp
+            <input type="tel" id="acceso-telefono" placeholder="Ej. 664 731 8119" autocomplete="tel" />
+          </label>
+          <div id="recaptcha-container"></div>
+          <button id="btn-enviar-codigo" class="btn btn-primary" type="button">Enviarme el código por SMS</button>
+          <label id="acceso-codigo-label" style="display:none">
+            Código que te llegó por SMS
+            <input type="text" id="acceso-codigo" inputmode="numeric" placeholder="123456" />
+          </label>
+          <button id="btn-confirmar-codigo" class="btn btn-primary" type="button" style="display:none">Confirmar código</button>
+          <p id="acceso-mensaje" class="muted"></p>
+          <p class="muted">¿Eres administrador? También puedes entrar con contraseña, sin SMS.</p>
+          <label>
+            Contraseña de administrador
+            <input type="password" id="acceso-clave" placeholder="Contraseña" autocomplete="current-password" />
+          </label>
+          <button id="btn-entrar-clave" class="btn btn-secondary" type="button">Entrar como administrador</button>
+          <p id="acceso-clave-mensaje" class="muted"></p>
+        </div>
       </div>
     </section>
 
@@ -408,22 +472,22 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
       <ul id="lista-eventos" class="lista"></ul>
     </section>
 
-    <section class="section" id="reto">
-      <h2>Reto de hoy</h2>
+    <section class="section seccion-divertida" id="reto">
+      <h2>Reto de hoy 🎯</h2>
       <p class="muted">Un reto distinto cada día, el mismo para todo el equipo. ¿Te animas?</p>
       <p class="reto-texto" id="reto-texto"></p>
       <button id="btn-otro-reto" class="btn btn-secondary" type="button">Otro reto</button>
     </section>
 
-    <section class="section" id="encuesta">
-      <h2>Encuesta: ¿qué no puede faltar?</h2>
+    <section class="section seccion-divertida" id="encuesta">
+      <h2>Encuesta: ¿qué no puede faltar? 🗳️</h2>
       <p class="muted">Vota y ve en vivo lo que quiere el equipo. Solo puedes votar una vez.</p>
       <div id="encuesta-opciones" class="encuesta"></div>
       <p class="muted" id="encuesta-total"></p>
     </section>
 
-    <section class="section" id="puntos">
-      <h2>Tabla de puntos del equipo</h2>
+    <section class="section seccion-divertida" id="puntos">
+      <h2>Tabla de puntos del equipo 🏆</h2>
       <p class="muted">Confirmar vale 10 puntos, traer algo 10, apuntarse con algo 5 y subir una idea 5. El que más junte es el alma de la fiesta.</p>
       <ol id="puntos-lista" class="puntos-lista"></ol>
       <p class="muted" id="puntos-vacio" style="display:none">Nadie tiene puntos todavía. Sé el primero en confirmar.</p>
@@ -511,8 +575,8 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
       <p class="muted" id="ideas-vacia">Aún no hay ideas. ¡Sube la primera!</p>
     </section>
 
-    <section class="section" id="convivir">
-      <h2>Para convivir más</h2>
+    <section class="section seccion-divertida" id="convivir">
+      <h2>Para convivir más 🎉</h2>
       <p class="muted">La idea es que todos platiquen con alguien nuevo. Toca un botón y la página te sugiere una actividad o con quién convivir.</p>
       <div class="convivir-botones">
         <button id="btn-actividad" class="btn btn-primary" type="button">Sugerir una actividad</button>
@@ -1343,6 +1407,7 @@ function pintarPuntos() {
   vacio.style.display = top.length ? "none" : "block";
   top.forEach((p, i) => {
     const li = document.createElement("li");
+    li.className = "puntos-" + (i + 1);
     const nombre = document.createElement("span");
     nombre.textContent = (i + 1) + ". " + censurar(p.nombre) + " — " + p.pts + " pts";
     const titulo = document.createElement("span");
@@ -1690,13 +1755,27 @@ function crearVerificador() {
   }
 }
 
+// El acceso es una barra discreta: el formulario solo se abre al tocar Entrar.
+let accesoAbierto = false;
+
 function actualizarAcceso() {
   const autenticado = !!sesionNumero || sesionAdminClave;
-  document.getElementById("acceso-no").style.display = autenticado ? "none" : "grid";
-  document.getElementById("acceso-si").style.display = autenticado ? "grid" : "none";
+  const estado = document.getElementById("acceso-estado");
+  const toggle = document.getElementById("btn-acceso-toggle");
+  const salir = document.getElementById("btn-salir");
+  const panel = document.getElementById("acceso-panel");
   if (autenticado) {
-    document.getElementById("acceso-numero").textContent =
-      sesionNumero || "administrador (contraseña)";
+    estado.textContent = "Sesión: " + (sesionNumero || "administrador");
+    toggle.style.display = "none";
+    salir.style.display = "inline-block";
+    panel.style.display = "none";
+    accesoAbierto = false;
+  } else {
+    estado.textContent = "Acceso del equipo";
+    toggle.style.display = "inline-block";
+    toggle.textContent = accesoAbierto ? "Cerrar" : "Entrar";
+    salir.style.display = "none";
+    panel.style.display = accesoAbierto ? "block" : "none";
   }
   // Lo editable solo se puede usar con sesión verificada.
   ["rsvp-form", "llevar-form", "ideas-form"].forEach((id) => {
@@ -1771,6 +1850,11 @@ function initAuth() {
     } catch (err) {
       mensajeAcceso("Código incorrecto. Revísalo e inténtalo de nuevo.");
     }
+  });
+
+  document.getElementById("btn-acceso-toggle").addEventListener("click", () => {
+    accesoAbierto = !accesoAbierto;
+    actualizarAcceso();
   });
 
   document.getElementById("btn-salir").addEventListener("click", () => {
