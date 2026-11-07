@@ -4,7 +4,14 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Eventos de Convivencia – La Fisher MX3</title>
-  <meta name="description" content="Página de eventos de convivencia de La Fisher MX3: el evento más próximo es decoración y convivencia por motivos decembrinos. Confirma tu asistencia, apúntate con algo para llevar y sube tus ideas." />
+  <meta name="description" content="Página de eventos ocasionales de La Fisher MX3: convivios, pedidos de comida de la semana y días festivos. Confirma tu asistencia, propón qué pedir y entérate de lo que se acerca." />
+  <link rel="manifest" href="./manifest.webmanifest" />
+  <meta name="theme-color" content="#0f2a44" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Fisher MX3" />
+  <link rel="apple-touch-icon" href="./icon-192.png" />
   <style>
 :root {
   --verde: #0f2a44;
@@ -361,7 +368,19 @@ footer {
 
 footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem; }
 
-  </style>
+/* Eventos ocasionales, días especiales y pedido semanal */
+.dias-banner {
+  background: var(--alegre-suave);
+  border: 2px solid var(--alegre);
+  border-radius: 1rem;
+  padding: 1rem 1.25rem;
+  margin: 1rem 0;
+}
+.dias-banner h3 { margin: 0 0 0.25rem; }
+.dias-banner p { margin: 0 0 0.75rem; }
+.encuesta-ganador { outline: 2px solid var(--alegre); border-radius: 0.6rem; }
+
+</style>
 </head>
 <body>
   <header class="hero">
@@ -379,6 +398,7 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
     <div class="hero-actions">
       <a class="btn btn-primary" href="#confirmar">Confirmar asistencia</a>
       <a class="btn btn-ghost" href="#llevar">¿Qué llevo?</a>
+      <button id="btn-instalar" class="btn btn-ghost" type="button" style="display:none">📲 Instalar app</button>
     </div>
 
     <div class="hero-stats" aria-label="Actividad del equipo">
@@ -453,10 +473,50 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
         </article>
       </section>
 
+      <section class="section" id="dias-especiales">
+        <h2>🎉 Se acerca un día especial</h2>
+        <p class="muted">Cuando se acerca un día conmemorativo o de descanso, la página sugiere qué hacer. Toca “Armar algo” y queda propuesto como evento.</p>
+        <div id="dias-especiales-banner"></div>
+        <ul id="dias-especiales-lista" class="lista"></ul>
+        <p class="muted" id="dias-especiales-vacio" style="display:none">No hay días especiales cerca por ahora.</p>
+      </section>
+
       <section class="section" id="eventos">
-        <h2>Eventos de convivencia</h2>
-        <p class="muted">Aquí se organizan los convivios del equipo. El evento más próximo es el de decoración y convivencia por motivos decembrinos.</p>
+        <h2>Próximos eventos ocasionales</h2>
+        <p class="muted">Aquí se organizan los eventos ocasionales del equipo: convivios, pedidos de comida, días festivos y lo que se arme en la semana. No es solo por temporada.</p>
         <ul id="lista-eventos" class="lista"></ul>
+        <h3>Eventos propuestos por el equipo</h3>
+        <ul id="lista-eventos-ocasionales" class="lista"></ul>
+        <p class="muted" id="eventos-ocasionales-vacio">Aún no hay eventos propuestos. ¡Propón el primero!</p>
+        <form id="evento-ocasional-form" class="form form-compacto">
+          <label>
+            Tu nombre
+            <input type="text" id="evento-ocasional-nombre" placeholder="Ej. Mauricio" />
+          </label>
+          <label>
+            ¿Qué se va a hacer?
+            <input type="text" id="evento-ocasional-titulo" required placeholder="Ej. Pedido de tacos el viernes" />
+          </label>
+          <label>
+            Tipo de evento
+            <select id="evento-ocasional-tipo">
+              <option>Convivio</option>
+              <option>Pedido de comida</option>
+              <option>Día festivo</option>
+              <option>Cumpleaños</option>
+              <option>Otro</option>
+            </select>
+          </label>
+          <label>
+            ¿Cuándo? (fecha o día)
+            <input type="text" id="evento-ocasional-fecha" placeholder="Ej. Viernes 20 de noviembre" />
+          </label>
+          <label>
+            Detalles (opcional)
+            <input type="text" id="evento-ocasional-detalle" placeholder="Ej. En el almacén, cada quien pone $50" />
+          </label>
+          <button class="btn btn-primary" type="submit">Proponer evento</button>
+        </form>
       </section>
 
       <section class="section" id="organizadores">
@@ -528,6 +588,28 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
         <h3>Ya se apuntaron con algo</h3>
         <ul id="lista-apuntados" class="lista"></ul>
         <p class="muted" id="apuntados-vacio">Aún nadie se ha apuntado. ¡Sé el primero!</p>
+      </section>
+
+      <section class="section seccion-divertida" id="pedido">
+        <h2>¿Qué pedimos esta semana? 🍔</h2>
+        <p class="muted">Propón qué pedir y vota. El más votado se pide el <strong id="pedido-dia">viernes</strong>. Un voto por persona por semana; cada lunes se reinicia solo.</p>
+        <div id="pedido-opciones" class="encuesta"></div>
+        <p class="muted" id="pedido-total"></p>
+        <form id="pedido-opcion-form" class="form form-compacto">
+          <label>
+            Tu nombre
+            <input type="text" id="pedido-opcion-nombre" placeholder="Ej. Mauricio" />
+          </label>
+          <label>
+            ¿Qué pedimos? (plato o restaurante)
+            <input type="text" id="pedido-opcion-texto" required placeholder="Ej. Tacos de asada de Tacos El Gordo" />
+          </label>
+          <label>
+            Precio aprox. por persona (opcional)
+            <input type="text" id="pedido-opcion-precio" placeholder="Ej. $80" />
+          </label>
+          <button class="btn btn-primary" type="submit">Proponer para pedir</button>
+        </form>
       </section>
 
       <section class="section" id="ideas">
@@ -668,6 +750,10 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
             Cooperación
             <input type="text" id="panel-evento-cooperacion" />
           </label>
+          <label>
+            Día del pedido semanal
+            <input type="text" id="panel-pedido-dia" placeholder="Ej. Viernes" />
+          </label>
           <button class="btn btn-primary" type="submit">Guardar datos del evento</button>
         </form>
 
@@ -733,6 +819,33 @@ const CONFIG = {
       fecha: "Fecha por definir",
       estado: "Próximo",
     },
+  ],
+  // Días conmemorativos y de descanso (México, fecha fija cada año).
+  // La página avisa cuando falta poco y sugiere qué hacer.
+  diasEspeciales: [
+    { mes: 1, dia: 1, nombre: "Año Nuevo", tipo: "descanso", sugerencia: "Brindis y recalentado en equipo: cada quien trae lo que sobró y lo compartimos." },
+    { mes: 2, dia: 5, nombre: "Día de la Constitución", tipo: "descanso", sugerencia: "Día libre: ¿pedimos de comer y hacemos tarde de juegos?" },
+    { mes: 2, dia: 14, nombre: "Día del Amor y la Amistad", tipo: "conmemorativo", sugerencia: "Intercambio de dulces o cartas entre compañeros." },
+    { mes: 3, dia: 21, nombre: "Natalicio de Benito Juárez", tipo: "descanso", sugerencia: "Puente: ¿algo tranquilo en el almacén o una salida corta?" },
+    { mes: 4, dia: 30, nombre: "Día del Niño", tipo: "conmemorativo", sugerencia: "Dulces y juegos: todos sacamos al niño que traemos dentro." },
+    { mes: 5, dia: 1, nombre: "Día del Trabajo", tipo: "descanso", sugerencia: "Descanso: carne asada o pedido para el equipo." },
+    { mes: 5, dia: 10, nombre: "Día de las Madres", tipo: "conmemorativo", sugerencia: "Un detalle para las mamás del equipo." },
+    { mes: 9, dia: 15, nombre: "El Grito de Independencia", tipo: "conmemorativo", sugerencia: "Noche de antojitos mexicanos." },
+    { mes: 9, dia: 16, nombre: "Día de la Independencia", tipo: "descanso", sugerencia: "Noche mexicana: antojitos, música y algo para brindar." },
+    { mes: 10, dia: 31, nombre: "Halloween", tipo: "conmemorativo", sugerencia: "Disfraces en el trabajo y concurso al mejor disfraz." },
+    { mes: 11, dia: 2, nombre: "Día de Muertos", tipo: "conmemorativo", sugerencia: "Altar chiquito en el almacén y pan de muerto para compartir." },
+    { mes: 11, dia: 20, nombre: "Día de la Revolución", tipo: "descanso", sugerencia: "Puente: ¿convivio corto o pedido de comida para el equipo?" },
+    { mes: 12, dia: 12, nombre: "Día de la Virgen de Guadalupe", tipo: "conmemorativo", sugerencia: "Mañanitas y tamales en la mañana." },
+    { mes: 12, dia: 25, nombre: "Navidad", tipo: "descanso", sugerencia: "Intercambio y cena del equipo." },
+  ],
+  // Sugerencias base de qué pedir en la semana; el equipo propone más.
+  pedidoSugerencias: [
+    "Tacos",
+    "Pizza",
+    "Sushi",
+    "Tortas",
+    "Alitas",
+    "Mariscos",
   ],
   agenda: [
     "Adornar el almacén",
@@ -962,11 +1075,11 @@ async function fotoPermitida(canvas) {
 //  todos ven lo mismo en tiempo real. Si no, se guarda en el
 //  navegador de cada persona (modo local).
 // ============================================================
-const COLECCIONES = ["rsvp", "apuntados", "llevar", "ideas", "encuesta", "admin", "actividades", "retos", "encuestaOpciones"];
+const COLECCIONES = ["rsvp", "apuntados", "llevar", "ideas", "encuesta", "admin", "actividades", "retos", "encuestaOpciones", "eventosOcasionales", "pedidoOpciones", "pedidoVotos"];
 const LS_PREFIX = "fisher-navidad-";
 
 const Store = {
-  datos: { rsvp: [], apuntados: [], llevar: {}, ideas: [], encuesta: {}, admin: {}, actividades: {}, retos: {}, encuestaOpciones: {} },
+  datos: { rsvp: [], apuntados: [], llevar: {}, ideas: [], encuesta: {}, admin: {}, actividades: {}, retos: {}, encuestaOpciones: {}, eventosOcasionales: {}, pedidoOpciones: {}, pedidoVotos: {} },
   nube: false,
   db: null,
 
@@ -980,7 +1093,7 @@ const Store = {
         this.db.on("value", (snap) => {
           const v = snap.val() || {};
           COLECCIONES.forEach((c) => {
-            this.datos[c] = v[c] || (c === "llevar" || c === "encuesta" || c === "admin" || c === "actividades" || c === "retos" || c === "encuestaOpciones" ? {} : []);
+            this.datos[c] = v[c] || (c === "llevar" || c === "encuesta" || c === "admin" || c === "actividades" || c === "retos" || c === "encuestaOpciones" || c === "eventosOcasionales" || c === "pedidoOpciones" || c === "pedidoVotos" ? {} : []);
           });
           adminCargado = true;
           repintarTodo();
@@ -1632,6 +1745,222 @@ function pintarPuntos() {
   });
 }
 
+// ---------------- Eventos ocasionales, días especiales y pedido semanal ----------------
+// La página ya no es solo de temporada: cualquier evento ocasional
+// (convivio, pedido de comida, día festivo, cumpleaños) se propone aquí.
+function proximosDiasEspeciales(diasMax, limite) {
+  const hoy = new Date();
+  hoy.setHours(0, 0, 0, 0);
+  return CONFIG.diasEspeciales
+    .map((d) => {
+      let fecha = new Date(hoy.getFullYear(), d.mes - 1, d.dia);
+      if (fecha < hoy) fecha = new Date(hoy.getFullYear() + 1, d.mes - 1, d.dia);
+      return { ...d, fecha, dias: Math.round((fecha - hoy) / 86400000) };
+    })
+    .filter((d) => d.dias <= diasMax)
+    .sort((a, b) => a.dias - b.dias)
+    .slice(0, limite);
+}
+
+function fechaCorta(fecha) {
+  return fecha.toLocaleDateString("es-MX", { day: "numeric", month: "long" });
+}
+
+function prellenarEvento(dia) {
+  document.getElementById("evento-ocasional-titulo").value = "Convivio – " + dia.nombre;
+  document.getElementById("evento-ocasional-tipo").value = "Día festivo";
+  document.getElementById("evento-ocasional-fecha").value =
+    fechaCorta(dia.fecha) + (dia.dias === 0 ? " (hoy)" : dia.dias === 1 ? " (mañana)" : " (en " + dia.dias + " días)");
+  document.getElementById("evento-ocasional-detalle").value = dia.sugerencia;
+  document.getElementById("evento-ocasional-form").scrollIntoView({ behavior: "smooth", block: "center" });
+  document.getElementById("evento-ocasional-titulo").focus();
+}
+
+function pintarDiasEspeciales() {
+  const banner = document.getElementById("dias-especiales-banner");
+  const lista = document.getElementById("dias-especiales-lista");
+  const vacio = document.getElementById("dias-especiales-vacio");
+  const proximos = proximosDiasEspeciales(21, 3);
+  banner.innerHTML = "";
+  lista.innerHTML = "";
+  vacio.style.display = proximos.length ? "none" : "block";
+  if (!proximos.length) return;
+  const primero = proximos[0];
+  const titulo = document.createElement("h3");
+  titulo.textContent = "🎉 Se acerca: " + primero.nombre + " — " + fechaCorta(primero.fecha) +
+    (primero.dias === 0 ? " (¡hoy!)" : primero.dias === 1 ? " (mañana)" : " (en " + primero.dias + " días)");
+  const texto = document.createElement("p");
+  texto.textContent = (primero.tipo === "descanso" ? "Día de descanso. " : "") + primero.sugerencia;
+  const btn = document.createElement("button");
+  btn.className = "btn btn-primary";
+  btn.type = "button";
+  btn.textContent = "Armar algo para este día";
+  btn.addEventListener("click", () => prellenarEvento(primero));
+  banner.append(titulo, texto, btn);
+  proximos.forEach((d) => {
+    const li = document.createElement("li");
+    const textoLi = document.createElement("span");
+    textoLi.textContent = d.nombre + " — " + fechaCorta(d.fecha) +
+      (d.dias === 0 ? " (hoy)" : d.dias === 1 ? " (mañana)" : " (en " + d.dias + " días)");
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = d.tipo === "descanso" ? "Descanso" : "Conmemorativo";
+    li.append(textoLi, badge);
+    lista.appendChild(li);
+  });
+}
+
+function pintarEventosOcasionales() {
+  const lista = document.getElementById("lista-eventos-ocasionales");
+  const vacio = document.getElementById("eventos-ocasionales-vacio");
+  const propuestas = Object.values(Store.get("eventosOcasionales") || {});
+  lista.innerHTML = "";
+  vacio.style.display = propuestas.length ? "none" : "block";
+  propuestas.forEach((ev) => {
+    const li = document.createElement("li");
+    const texto = document.createElement("span");
+    texto.textContent = censurar(ev.titulo || ev.nombre || "Evento") +
+      (ev.fecha ? " — " + censurar(ev.fecha) : "") +
+      (ev.descripcion ? " · " + censurar(ev.descripcion) : "");
+    const badge = document.createElement("span");
+    badge.className = "badge";
+    badge.textContent = censurar(ev.tipo || "Evento");
+    li.append(texto, badge);
+    lista.appendChild(li);
+  });
+}
+
+document.getElementById("evento-ocasional-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!puedeEditar()) {
+    alert("Primero verifica tu número en la sección Acceso del equipo.");
+    return;
+  }
+  const nombre = document.getElementById("evento-ocasional-nombre").value.trim();
+  const titulo = document.getElementById("evento-ocasional-titulo").value.trim();
+  const tipo = document.getElementById("evento-ocasional-tipo").value;
+  const fecha = document.getElementById("evento-ocasional-fecha").value.trim();
+  const descripcion = document.getElementById("evento-ocasional-detalle").value.trim();
+  if (!titulo) return;
+  if (!textoPermitido(nombre, titulo, descripcion)) return;
+  guardarPropuesta("eventosOcasionales", { nombre, titulo, tipo, fecha, descripcion });
+  e.target.reset();
+  alert("¡Gracias! Tu evento ocasional quedó propuesto y ya lo ve todo el equipo.");
+});
+
+// ---------------- ¿Qué pedimos esta semana? ----------------
+// Semana ISO (año-semana). El voto se guarda con la semana, así cada
+// semana empieza de cero sin que nadie tenga que reiniciar nada.
+function semanaActual() {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+  const primerJueves = new Date(d.getFullYear(), 0, 4);
+  primerJueves.setDate(primerJueves.getDate() + 3 - ((primerJueves.getDay() + 6) % 7));
+  const semana = 1 + Math.round(((d - primerJueves) / 86400000 - 3 + ((primerJueves.getDay() + 6) % 7)) / 7);
+  return d.getFullYear() + "-W" + String(semana).padStart(2, "0");
+}
+
+const PEDIDO_VOTO_KEY = "fisher-pedido-voto";
+
+function miVotoPedido() {
+  try {
+    const guardado = localStorage.getItem(PEDIDO_VOTO_KEY) || "";
+    const partes = guardado.split(":");
+    if (partes.length === 2 && partes[0] === semanaActual()) return partes[1];
+  } catch (e) {}
+  return null;
+}
+
+function pedidoDia() {
+  return (Store.datos.admin && Store.datos.admin.pedidoDia) || "viernes";
+}
+
+function opcionesPedidoTodas() {
+  const base = CONFIG.pedidoSugerencias.map((t, i) => ({ id: "base-" + i, texto: t }));
+  const propuestas = Object.entries(Store.get("pedidoOpciones") || {}).map(([id, o]) => ({
+    id,
+    texto: (o && o.texto) || o,
+    nombre: o && o.nombre,
+    precio: o && o.precio,
+  }));
+  return base.concat(propuestas.filter((o) => o.texto));
+}
+
+function votarPedido(id) {
+  const semana = semanaActual();
+  if (Store.nube) {
+    Store.db.child("pedidoVotos/" + semana + "/" + id).transaction((v) => (v || 0) + 1);
+  } else {
+    if (!Store.datos.pedidoVotos[semana]) Store.datos.pedidoVotos[semana] = {};
+    const m = Store.datos.pedidoVotos[semana];
+    m[id] = (m[id] || 0) + 1;
+    Store.guardar("pedidoVotos");
+  }
+  repintarTodo();
+}
+
+function pintarPedido() {
+  const semana = semanaActual();
+  const votos = (Store.get("pedidoVotos") || {})[semana] || {};
+  const opciones = opcionesPedidoTodas();
+  const total = opciones.reduce((a, o) => a + (votos[o.id] || 0), 0);
+  const max = Math.max(0, ...opciones.map((o) => votos[o.id] || 0));
+  const cont = document.getElementById("pedido-opciones");
+  const miVoto = miVotoPedido();
+  cont.innerHTML = "";
+  opciones.forEach((op) => {
+    const v = votos[op.id] || 0;
+    const pct = total ? Math.round((v / total) * 100) : 0;
+    const fila = document.createElement("div");
+    fila.className = "encuesta-opcion" + (total > 0 && v === max ? " encuesta-ganador" : "");
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "encuesta-btn";
+    btn.disabled = !puedeEditar() || !!miVoto;
+    btn.textContent = censurar(op.texto) + (op.precio ? " — " + censurar(op.precio) : "") +
+      " — " + v + " votos" + (miVoto === op.id ? " (tu voto)" : "");
+    btn.addEventListener("click", () => {
+      if (!puedeEditar()) {
+        alert("Primero verifica tu número en la sección Acceso del equipo.");
+        return;
+      }
+      if (miVotoPedido()) return;
+      try { localStorage.setItem(PEDIDO_VOTO_KEY, semana + ":" + op.id); } catch (e) {}
+      votarPedido(op.id);
+      celebrar();
+    });
+    const pista = document.createElement("div");
+    pista.className = "encuesta-pista";
+    const barra = document.createElement("div");
+    barra.className = "encuesta-barra";
+    barra.style.width = pct + "%";
+    pista.appendChild(barra);
+    fila.append(btn, pista);
+    cont.appendChild(fila);
+  });
+  document.getElementById("pedido-total").textContent = total
+    ? total + " votos esta semana · se pide el " + pedidoDia()
+    : "Aún nadie ha votado esta semana. ¡Propón algo y vota!";
+  document.getElementById("pedido-dia").textContent = pedidoDia();
+}
+
+document.getElementById("pedido-opcion-form").addEventListener("submit", (e) => {
+  e.preventDefault();
+  if (!puedeEditar()) {
+    alert("Primero verifica tu número en la sección Acceso del equipo.");
+    return;
+  }
+  const nombre = document.getElementById("pedido-opcion-nombre").value.trim();
+  const texto = document.getElementById("pedido-opcion-texto").value.trim();
+  const precio = document.getElementById("pedido-opcion-precio").value.trim();
+  if (!texto) return;
+  if (!textoPermitido(nombre, texto, precio)) return;
+  guardarPropuesta("pedidoOpciones", { nombre, texto, precio });
+  e.target.reset();
+  alert("¡Gracias! Tu propuesta ya aparece para pedir esta semana y se puede votar.");
+});
+
 // ---------------- Panel de control (solo administradores) ----------------
 // Los números permitidos viven en la nube (admin/numeros) para que el panel
 // pueda registrar y quitar gente sin tocar el código. Si la nube aún no
@@ -1800,6 +2129,7 @@ function pintarPanel() {
   rellenar("panel-evento-lugar", ev.lugar);
   rellenar("panel-evento-direccion", ev.direccion);
   rellenar("panel-evento-cooperacion", ev.cooperacion);
+  rellenar("panel-pedido-dia", (Store.datos.admin && Store.datos.admin.pedidoDia) || "viernes");
 
   // Extras de "¿Qué hace falta?" con botón para quitar.
   const extrasEl = document.getElementById("panel-llevar-extras");
@@ -1867,6 +2197,15 @@ document.getElementById("panel-evento-form").addEventListener("submit", (e) => {
     direccion: document.getElementById("panel-evento-direccion").value.trim(),
     cooperacion: document.getElementById("panel-evento-cooperacion").value.trim(),
   };
+  const pedidoDiaNuevo = document.getElementById("panel-pedido-dia").value.trim();
+  if (pedidoDiaNuevo) {
+    if (Store.nube) {
+      Store.db.child("admin/pedidoDia").set(pedidoDiaNuevo);
+    } else {
+      if (!Store.datos.admin) Store.datos.admin = {};
+      Store.datos.admin.pedidoDia = pedidoDiaNuevo;
+    }
+  }
   if (Store.nube) {
     Store.db.child("admin/evento").set(datos);
   } else {
@@ -1998,7 +2337,7 @@ function actualizarAcceso() {
     panel.style.display = accesoAbierto ? "block" : "none";
   }
   // Lo editable solo se puede usar con sesión verificada.
-  ["rsvp-form", "llevar-form", "ideas-form", "reto-form", "encuesta-opcion-form", "actividad-form"].forEach((id) => {
+  ["rsvp-form", "llevar-form", "ideas-form", "reto-form", "encuesta-opcion-form", "actividad-form", "evento-ocasional-form", "pedido-opcion-form"].forEach((id) => {
     document.getElementById(id).querySelectorAll("input, select, textarea, button").forEach((el) => {
       el.disabled = !autenticado;
     });
@@ -2174,6 +2513,43 @@ function pintarHeroStats() {
   document.getElementById("stat-votos").textContent = votos;
 }
 
+// ---------------- Página instalable (PWA) ----------------
+// Manifiesto + service worker: en GitHub Pages (https) el navegador
+// ofrece instalarla como app. Desde archivo local no se puede instalar.
+let promptInstalacion = null;
+
+function registrarPWA() {
+  const btn = document.getElementById("btn-instalar");
+  const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent || "") &&
+    !window.matchMedia("(display-mode: standalone)").matches;
+  if ("serviceWorker" in navigator && (location.protocol === "https:" || location.hostname === "localhost")) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./sw.js").catch(() => {});
+    });
+  }
+  window.addEventListener("beforeinstallprompt", (e) => {
+    e.preventDefault();
+    promptInstalacion = e;
+    btn.style.display = "";
+  });
+  if (esIOS) btn.style.display = "";
+  btn.addEventListener("click", async () => {
+    if (promptInstalacion) {
+      promptInstalacion.prompt();
+      try { await promptInstalacion.userChoice; } catch (e) {}
+      promptInstalacion = null;
+      btn.style.display = "none";
+    } else if (esIOS) {
+      alert("En iPhone: toca Compartir (el cuadrito con la flecha) y luego “Añadir a pantalla de inicio”. Así queda instalada como app.");
+    } else {
+      alert("Para instalarla: en Chrome toca el menú ⋮ y luego “Instalar app” o “Añadir a pantalla de inicio”.");
+    }
+  });
+  window.addEventListener("appinstalled", () => {
+    btn.style.display = "none";
+  });
+}
+
 // ---------------- Arranque ----------------
 function repintarTodo() {
   pintarEvento();
@@ -2183,6 +2559,9 @@ function repintarTodo() {
   pintarApuntados();
   pintarIdeas();
   pintarReto();
+  pintarDiasEspeciales();
+  pintarEventosOcasionales();
+  pintarPedido();
   pintarEncuesta();
   pintarPuntos();
   pintarActividadesPropuestas();
@@ -2194,9 +2573,10 @@ function repintarTodo() {
 }
 
 initAuth();
+registrarPWA();
 Store.init();
 repintarTodo();
 
-  </script>
+</script>
 </body>
 </html>
