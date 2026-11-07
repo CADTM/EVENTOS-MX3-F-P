@@ -90,6 +90,15 @@ body {
 
 main { max-width: 56rem; margin: 0 auto; padding: 0 1.25rem 2rem; }
 
+.aviso {
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  margin: 1.25rem 0 0;
+  font-size: 0.95rem;
+}
+
 .cards {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr));
@@ -212,6 +221,8 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
   </header>
 
   <main>
+    <p class="aviso" id="aviso-nube" style="display:none">💡 Modo local: lo que guardes solo se ve en tu celular. Para que todos vean las confirmaciones, los apuntados y las ideas con foto, activa el guardado compartido (Firebase, gratis) siguiendo el README.</p>
+
     <section class="cards">
       <article class="card">
         <h2>📅 Fecha</h2>
@@ -329,6 +340,8 @@ footer code { background: #f5f5f4; padding: 0.1rem 0.4rem; border-radius: 0.3rem
     <p>Hecho con ❤️ para el equipo · Edita los datos del evento en la sección CONFIG al inicio del script de esta misma página.</p>
   </footer>
 
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
   <script>
 // ============================================================
 //  CONFIG — edita aquí los datos del evento y guarda el archivo
@@ -365,6 +378,97 @@ const CONFIG = {
     "Piñata y dulces",
     "Postre",
   ],
+
+  // ------------------------------------------------------------
+  //  GUARDADO COMPARTIDO (para que TODOS vean los datos)
+  //  Sin esto, cada quien solo ve lo que guardó en su celular.
+  //  Para activarlo, crea un proyecto GRATIS en Firebase:
+  //  1. Entra a https://console.firebase.google.com y crea un proyecto.
+  //  2. En "Compilación → Realtime Database", crea una base de datos
+  //     en modo de prueba (así cualquiera puede leer y escribir).
+  //  3. En "Configuración del proyecto → Tus apps → Web", copia tu
+  //     configuración y pégala aquí (ver ejemplo abajo).
+  //  Ejemplo:
+  //  firebase: {
+  //    apiKey: "TU_API_KEY",
+  //    authDomain: "tu-proyecto.firebaseapp.com",
+  //    databaseURL: "https://tu-proyecto-default-rtdb.firebaseio.com",
+  //    projectId: "tu-proyecto",
+  //  },
+  // ------------------------------------------------------------
+  firebase: {
+    apiKey: "AIzaSyD1ON-HgrKQmtBRKJBASpHol7WGiGI8rTA",
+    authDomain: "paginafisher.firebaseapp.com",
+    databaseURL: "https://paginafisher-default-rtdb.firebaseio.com",
+    projectId: "paginafisher",
+    storageBucket: "paginafisher.firebasestorage.app",
+    messagingSenderId: "182887211481",
+    appId: "1:182887211481:web:dc59b6126a536f38fd39c8",
+    measurementId: "G-QZVC977QS6",
+  },
+};
+
+// ============================================================
+//  GUARDADO DE DATOS
+//  Si hay configuración de Firebase, todo se guarda en la nube y
+//  todos ven lo mismo en tiempo real. Si no, se guarda en el
+//  navegador de cada persona (modo local).
+// ============================================================
+const COLECCIONES = ["rsvp", "apuntados", "llevar", "ideas"];
+const LS_PREFIX = "fisher-navidad-";
+
+const Store = {
+  datos: { rsvp: [], apuntados: [], llevar: {}, ideas: [] },
+  nube: false,
+  db: null,
+
+  init() {
+    if (CONFIG.firebase && window.firebase) {
+      try {
+        firebase.initializeApp(CONFIG.firebase);
+        this.db = firebase.database().ref("evento-navideno-fisher");
+        this.nube = true;
+        // Cada cambio en la nube actualiza la página de todos al instante.
+        this.db.on("value", (snap) => {
+          const v = snap.val() || {};
+          COLECCIONES.forEach((c) => {
+            this.datos[c] = v[c] || (c === "llevar" ? {} : []);
+          });
+          repintarTodo();
+        });
+      } catch (e) {
+        this.nube = false;
+      }
+    }
+    if (!this.nube) {
+      COLECCIONES.forEach((c) => {
+        try {
+          this.datos[c] =
+            JSON.parse(localStorage.getItem(LS_PREFIX + c)) || this.datos[c];
+        } catch (e) {
+          /* se queda el valor por defecto */
+        }
+      });
+      const aviso = document.getElementById("aviso-nube");
+      if (aviso) aviso.style.display = "block";
+    }
+  },
+
+  get(c) {
+    return this.datos[c];
+  },
+
+  guardar(c) {
+    if (this.nube) {
+      this.db.child(c).set(this.datos[c]);
+    } else {
+      try {
+        localStorage.setItem(LS_PREFIX + c, JSON.stringify(this.datos[c]));
+      } catch (e) {
+        /* sin espacio en el navegador: el dato no se pudo guardar */
+      }
+    }
+  },
 };
 
 // ---------------- Datos del evento en la página ----------------
@@ -410,28 +514,12 @@ CONFIG.agenda.forEach((item) => {
   agendaEl.appendChild(li);
 });
 
-// ---------------- Confirmaciones (se guardan en el navegador) ----------------
-const RSVP_KEY = "fisher-navidad-rsvp";
-const LLEVAR_KEY = "fisher-navidad-llevar";
-
-function cargar(clave, defecto) {
-  try {
-    return JSON.parse(localStorage.getItem(clave)) || defecto;
-  } catch {
-    return defecto;
-  }
-}
-function guardar(clave, valor) {
-  localStorage.setItem(clave, JSON.stringify(valor));
-}
-
-let confirmados = cargar(RSVP_KEY, []);
-let llevarAsignado = cargar(LLEVAR_KEY, {});
-
+// ---------------- Confirmaciones ----------------
 const listaEl = document.getElementById("lista-confirmados");
 const vaciaEl = document.getElementById("lista-vacia");
 
 function pintarConfirmados() {
+  const confirmados = Store.get("rsvp");
   listaEl.innerHTML = "";
   const si = confirmados.filter((c) => c.asiste === "si");
   const no = confirmados.filter((c) => c.asiste === "no");
@@ -460,6 +548,7 @@ document.getElementById("rsvp-form").addEventListener("submit", (e) => {
   e.preventDefault();
   const nombre = document.getElementById("rsvp-nombre").value.trim();
   if (!nombre) return;
+  const confirmados = Store.get("rsvp");
   const registro = {
     nombre,
     asiste: document.getElementById("rsvp-asiste").value,
@@ -471,7 +560,7 @@ document.getElementById("rsvp-form").addEventListener("submit", (e) => {
   );
   if (i >= 0) confirmados[i] = registro;
   else confirmados.push(registro);
-  guardar(RSVP_KEY, confirmados);
+  Store.guardar("rsvp");
   pintarConfirmados();
   e.target.reset();
   document.getElementById("rsvp-acompanantes").value = 0;
@@ -480,7 +569,9 @@ document.getElementById("rsvp-form").addEventListener("submit", (e) => {
 
 // ---------------- ¿Qué hace falta? ----------------
 const llevarEl = document.getElementById("lista-llevar");
+
 function pintarLlevar() {
+  const llevarAsignado = Store.get("llevar");
   llevarEl.innerHTML = "";
   CONFIG.llevar.forEach((item) => {
     const li = document.createElement("li");
@@ -500,7 +591,7 @@ function pintarLlevar() {
         const persona = prompt("¿Tu nombre?", "");
         if (persona && persona.trim()) {
           llevarAsignado[item] = persona.trim();
-          guardar(LLEVAR_KEY, llevarAsignado);
+          Store.guardar("llevar");
           pintarLlevar();
         }
       });
@@ -511,12 +602,11 @@ function pintarLlevar() {
 }
 
 // ---------------- Apuntarse con algo (lista libre, queda guardado) ----------------
-const APUNTADOS_KEY = "fisher-navidad-apuntados";
-let apuntados = cargar(APUNTADOS_KEY, []);
 const listaApuntadosEl = document.getElementById("lista-apuntados");
 const apuntadosVacioEl = document.getElementById("apuntados-vacio");
 
 function pintarApuntados() {
+  const apuntados = Store.get("apuntados");
   listaApuntadosEl.innerHTML = "";
   apuntadosVacioEl.style.display = apuntados.length ? "none" : "block";
   apuntados.forEach((a) => {
@@ -536,37 +626,20 @@ document.getElementById("llevar-form").addEventListener("submit", (e) => {
   const nombre = document.getElementById("llevar-nombre").value.trim();
   const que = document.getElementById("llevar-que").value.trim();
   if (!nombre || !que) return;
+  const apuntados = Store.get("apuntados");
   apuntados.push({ nombre, que });
-  guardar(APUNTADOS_KEY, apuntados);
+  Store.guardar("apuntados");
   pintarApuntados();
   e.target.reset();
   alert("¡Gracias, " + nombre + "! Quedó guardado que llevas: " + que);
 });
 
-// ---------------- Compartir por WhatsApp ----------------
-const textoShare =
-  "🎄 ¡Estás invitado al " +
-  CONFIG.titulo.replace("🎄 ", "") +
-  " de " +
-  CONFIG.empresa +
-  "! " +
-  CONFIG.fechaTexto +
-  ", " +
-  CONFIG.hora +
-  ", " +
-  CONFIG.lugar +
-  ". Confirma tu asistencia aquí: " +
-  location.href;
-document.getElementById("btn-whatsapp").href =
-  "https://wa.me/?text=" + encodeURIComponent(textoShare);
-
-// ---------------- Ideas para el evento ----------------
-const IDEAS_KEY = "fisher-navidad-ideas";
-let ideas = cargar(IDEAS_KEY, []);
+// ---------------- Ideas para el evento (con foto) ----------------
 const listaIdeasEl = document.getElementById("lista-ideas");
 const ideasVaciaEl = document.getElementById("ideas-vacia");
 
 function pintarIdeas() {
+  const ideas = Store.get("ideas");
   listaIdeasEl.innerHTML = "";
   ideasVaciaEl.style.display = ideas.length ? "none" : "block";
   ideas.forEach((idea) => {
@@ -599,12 +672,13 @@ document.getElementById("ideas-form").addEventListener("submit", (e) => {
   const archivo = document.getElementById("idea-foto").files[0];
 
   const terminar = (foto) => {
+    const ideas = Store.get("ideas");
     ideas.push({ nombre, texto, foto: foto || "" });
     try {
-      guardar(IDEAS_KEY, ideas);
-    } catch {
+      Store.guardar("ideas");
+    } catch (err) {
       ideas.pop();
-      alert("La foto es muy grande para guardarla en el navegador. Intenta con una foto más pequeña.");
+      alert("La foto es muy grande para guardarla. Intenta con una foto más pequeña.");
       return;
     }
     pintarIdeas();
@@ -616,7 +690,7 @@ document.getElementById("ideas-form").addEventListener("submit", (e) => {
     terminar("");
     return;
   }
-  // La foto se achica antes de guardarse para que quepa en el navegador.
+  // La foto se achica antes de guardarse para que quepa en la base de datos.
   const lector = new FileReader();
   lector.onload = () => {
     const img = new Image();
@@ -634,10 +708,33 @@ document.getElementById("ideas-form").addEventListener("submit", (e) => {
   lector.readAsDataURL(archivo);
 });
 
-pintarConfirmados();
-pintarLlevar();
-pintarApuntados();
-pintarIdeas();
+// ---------------- Compartir por WhatsApp ----------------
+const textoShare =
+  "🎄 ¡Estás invitado al " +
+  CONFIG.titulo.replace("🎄 ", "") +
+  " de " +
+  CONFIG.empresa +
+  "! " +
+  CONFIG.fechaTexto +
+  ", " +
+  CONFIG.hora +
+  ", " +
+  CONFIG.lugar +
+  ". Confirma tu asistencia aquí: " +
+  location.href;
+document.getElementById("btn-whatsapp").href =
+  "https://wa.me/?text=" + encodeURIComponent(textoShare);
+
+// ---------------- Arranque ----------------
+function repintarTodo() {
+  pintarConfirmados();
+  pintarLlevar();
+  pintarApuntados();
+  pintarIdeas();
+}
+
+Store.init();
+repintarTodo();
 
   </script>
 </body>
